@@ -58,12 +58,17 @@ window.__ModuleLoader__.load({
       branchMissing: '远端没有这个分支。可用分支：',
       useBranch: '改用',
       itemsCard: '同步项',
+      pluginDataCard: '插件数据文件',
+      pluginDataCardHint: '每行一个相对 $DSH_HOME 的文件或目录（目录以 / 结尾）。默认包含 dsh-whale-widget 的 .dshw-size.json、.dshw-bubble.json、.dshw-api.json；账本、统计、缓存和凭据不要加入。',
+      pluginDataSave: '保存清单',
       itemsCardHint: '只同步已开启的项目；关闭的项目会原样保留在仓库和本机。',
       itemPlugins: '插件清单',
       itemPluginsHint: 'package.json：已安装插件、版本与 bundle 启用列表；本机 link:/file: 依赖不会上传。',
       itemLocalPlugins: '本地插件源码',
       itemLocalPluginsHint: 'link:/file: 安装的插件代码（默认排除本插件自身）。拉取后写入本机对应目录；本机没有时会放进管理目录并加入依赖清单，需要时在插件页启用对应 bundle。',
       itemPluginConfig: '插件配置',
+      itemPluginData: '插件数据',
+      itemPluginDataHint: '插件写在 $DSH_HOME 的配置文件，例如 dsh-whale-widget 的外观、泡泡和自定义 API；不含账本、缓存和凭据。',
       itemPluginConfigHint: 'cordis.patch.yml：插件参数、模型选择、界面偏好等覆盖项。',
       itemLock: '依赖锁文件',
       itemLockHint: 'pnpm-lock.yaml 与 pnpm-workspace.yaml，保证各机器依赖版本一致；本机 link:/file: 条目同样不会上传。',
@@ -213,12 +218,17 @@ window.__ModuleLoader__.load({
       branchMissing: 'The remote has no such branch. Available:',
       useBranch: 'Use',
       itemsCard: 'Sync items',
+      pluginDataCard: 'Plugin data files',
+      pluginDataCardHint: 'One path per line, relative to $DSH_HOME (a trailing slash means a directory). Defaults include dsh-whale-widget’s .dshw-size.json, .dshw-bubble.json and .dshw-api.json; do not add ledgers, caches or credentials.',
+      pluginDataSave: 'Save list',
       itemsCardHint: 'Only enabled items sync. Disabled items stay untouched on both sides.',
       itemPlugins: 'Plugin manifest',
       itemPluginsHint: 'package.json: installed plugins, versions and the bundle enable list; machine-local link:/file: specs are not published.',
       itemLocalPlugins: 'Local plugin source',
       itemLocalPluginsHint: 'Source of link:/file: installed plugins (this plugin itself is excluded by default). Pulls write into the matching directory here; otherwise a managed copy is created and registered as a dependency (enable its bundle in the Plugins page if needed).',
       itemPluginConfig: 'Plugin configuration',
+      itemPluginData: 'Plugin data',
+      itemPluginDataHint: 'Plugin-owned config files under $DSH_HOME, such as dsh-whale-widget appearance, bubble and custom API settings; ledgers, caches and credentials are excluded.',
       itemPluginConfigHint: 'cordis.patch.yml: plugin parameters, model choice, UI preferences.',
       itemLock: 'Dependency lock',
       itemLockHint: 'pnpm-lock.yaml and pnpm-workspace.yaml for identical dependency versions; machine-local link:/file: blocks are not published.',
@@ -567,6 +577,8 @@ window.__ModuleLoader__.load({
       const [repoInput, setRepoInput] = React.useState('')
       const [branchInput, setBranchInput] = React.useState('main')
       const [tokenInput, setTokenInput] = React.useState('')
+      const [dataPathsText, setDataPathsText] = React.useState('')
+      const [dataPathsDirty, setDataPathsDirty] = React.useState(false)
       const [tokenDirty, setTokenDirty] = React.useState(false)
       const [showToken, setShowToken] = React.useState(false)
       const [formReady, setFormReady] = React.useState(false)
@@ -614,6 +626,13 @@ window.__ModuleLoader__.load({
         setBranchInput(status.branch ?? 'main')
         setFormReady(true)
       }, [status, formReady])
+
+      // The plugin-data path list is editable; a poll must not overwrite edits.
+      React.useEffect(() => {
+        if (status === null || dataPathsDirty) return
+        const paths = Array.isArray(status.pluginDataPaths) ? status.pluginDataPaths : []
+        setDataPathsText(paths.join('\n'))
+      }, [status?.pluginDataPaths, dataPathsDirty])
 
       const commitSettings = React.useCallback(async (patch, successKey) => {
         setBusy('settings')
@@ -785,6 +804,12 @@ window.__ModuleLoader__.load({
         }
       }, [errorText, openItem])
 
+      const saveDataPaths = React.useCallback(async () => {
+        const paths = dataPathsText.split('\n').map(line => line.trim()).filter(line => line !== '')
+        const saved = await commitSettings({ pluginDataPaths: paths }, 'savedNotice')
+        if (saved) setDataPathsDirty(false)
+      }, [commitSettings, dataPathsText])
+
       if (loadFailure !== null && status === null) {
         return h('section', { className: 'as-root' },
           h('style', null, CSS),
@@ -838,6 +863,7 @@ window.__ModuleLoader__.load({
         plugins: ['itemPlugins', 'itemPluginsHint'],
         localPlugins: ['itemLocalPlugins', 'itemLocalPluginsHint'],
         pluginConfig: ['itemPluginConfig', 'itemPluginConfigHint'],
+        pluginData: ['itemPluginData', 'itemPluginDataHint'],
         lock: ['itemLock', 'itemLockHint'],
         profileFiles: ['itemProfileFiles', 'itemProfileFilesHint'],
         skills: ['itemSkills', 'itemSkillsHint'],
@@ -1024,6 +1050,26 @@ window.__ModuleLoader__.load({
                         : null)
                   : null)
             })),
+
+          h(Card, { title: tr('pluginDataCard'), hint: tr('pluginDataCardHint') },
+            h('textarea', {
+              className: 'as-textarea',
+              rows: 4,
+              spellCheck: false,
+              value: dataPathsText,
+              disabled: busy !== null,
+              onChange: (event) => {
+                setDataPathsText(event.target.value)
+                setDataPathsDirty(true)
+              },
+            }),
+            h('div', { className: 'as-actions as-actions-tight' },
+              h('button', {
+                type: 'button',
+                className: 'as-btn as-primary',
+                disabled: busy !== null || !dataPathsDirty,
+                onClick: () => { void saveDataPaths() },
+              }, tr('pluginDataSave')))),
 
           h(Card, { title: tr('autoCard'), hint: tr('autoCardHint') },
             h(Row, {
@@ -1239,6 +1285,9 @@ window.__ModuleLoader__.load({
 @media (max-width:640px){.as-grid{grid-template-columns:minmax(0,1fr)}}
 .as-field{display:flex;flex-direction:column;gap:4px;min-width:0}
 .as-label{font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570)}
+.as-textarea{width:100%;min-height:78px;resize:vertical;padding:8px 10px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;line-height:18px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.as-textarea:focus{outline:2px solid var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));outline-offset:-1px;border-color:transparent}
+.as-textarea:disabled{opacity:.55}
 .as-input{width:100%;height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;outline:none}
 .as-input:focus{border-color:var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));box-shadow:0 0 0 2px color-mix(in srgb, var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff)) 22%, transparent)}
 .as-input::placeholder{color:var(--dsw-alias-label-secondary,#5c6570);opacity:.7}
@@ -1344,7 +1393,7 @@ window.__ModuleLoader__.load({
       inject: ['slots', 'locale'],
       apply(ctx) {
         try {
-          console.info('[anywhere-sync] settings client 1.2.3 loaded')
+          console.info('[anywhere-sync] settings client 1.4.0 loaded')
         } catch {
           // Console may be unavailable.
         }

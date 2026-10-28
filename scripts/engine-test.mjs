@@ -263,6 +263,17 @@ const ignoredRemoteSelf = await engine.sync('both')
 assert.equal(ignoredRemoteSelf.error, null)
 assert.ok(!ignoredRemoteSelf.pulled.some(entry => entry.path.startsWith('local-plugins/dsh-anywhere-sync/')), 'remote self source is ignored when excluded')
 
+// Plugin-owned config files travel through the pluginData item.
+writeFileSync(join(runtime.dshHome, '.dshw-size.json'), '{"scale":0.8,"bubbleOn":true}\n')
+await engine.saveConfig({ pluginDataPaths: ['.dshw-size.json'] })
+const dataPush = await engine.sync('both')
+assert.equal(dataPush.error, null)
+assert.ok(dataPush.pushed.some(entry => entry.path === 'plugin-data/.dshw-size.json'), 'plugin data is pushed')
+const dataJoin = await engineB.sync('both')
+assert.equal(dataJoin.error, null)
+assert.ok(dataJoin.pulled.some(entry => entry.path === 'plugin-data/.dshw-size.json'), 'plugin data is pulled')
+assert.equal(readFileSync(join(runtimeB.dshHome, '.dshw-size.json'), 'utf8'), '{"scale":0.8,"bubbleOn":true}\n')
+
 const status = await engine.status()
 assert.equal(status.repoConfigured, true)
 assert.equal(status.running, false)

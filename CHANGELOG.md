@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.0
+
+- New **Plugin data** sync item for plugin-owned configuration files under
+  `$DSH_HOME`, with an editable path list in the settings page. Defaults cover
+  dsh-whale-widget's `.dshw-size.json`, `.dshw-bubble.json` and
+  `.dshw-api.json`.
+- Plugin-data paths are relative to `$DSH_HOME`, may name a file or a directory
+  (trailing slash), and are validated server-side: absolute paths, `..`,
+  credentials/secrets/tokens, `profiles`, `storages`, `sessions` and this
+  plugin's own state are rejected.
+- Accounting ledgers, per-turn sequence and stats caches are deliberately not
+  defaults; add them only if whole-file sync is acceptable.
+
 ## 1.3.0
 
 - Install dependencies with `--no-frozen-lockfile`. A pulled manifest can gain a

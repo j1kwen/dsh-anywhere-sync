@@ -77,6 +77,7 @@ restart are required before the new plugins load.
 | Plugin manifest | `<profile>/package.json` | `profile/<profile>/package.json` | on |
 | Local plugin source | directories of `link:` / `file:` / absolute dependencies | `local-plugins/<package>/…` | on |
 | Plugin configuration | `<profile>/cordis.patch.yml` | `profile/<profile>/cordis.patch.yml` | on |
+| Plugin data | files under `$DSH_HOME` listed in the settings page | `plugin-data/<path>` | on |
 | Dependency lock | `<profile>/pnpm-lock.yaml`, `pnpm-workspace.yaml` | same | on |
 | Other profile files | remaining profile config (presets, `config.toml`, …) | `profile/<profile>/…` | off |
 | Skills | `~/.agents/skills/`, `~/.agents/.skill-lock.json` | `skills/…` | off |
@@ -93,8 +94,8 @@ comparison or push: `link:`, `file:`, `workspace:` and absolute-path specs
 with their bundle entries. When a remote manifest is pulled, local links are
 merged back in, so each machine keeps its own install paths.
 
-The source of every local dependency is carried under `local-plugins/<package>/`.
-On pull:
+The source of every other local dependency is carried under
+`local-plugins/<package>/`. On pull:
 
 - a machine that already links the package gets the source written back to its
   install directory;
@@ -111,6 +112,21 @@ in `$DSH_HOME/anywhere-sync` and are never synced.
 
 New machines still install this plugin once to get the settings page and the
 initial sync.
+
+## Plugin data
+
+Some plugins keep their settings outside `cordis.patch.yml`, in files under
+`$DSH_HOME`. The **Plugin data** item syncs the files or directories listed in
+the settings page to `plugin-data/<path>`.
+
+Defaults are dsh-whale-widget's `.dshw-size.json` (appearance/switches),
+`.dshw-bubble.json` (bubble layout) and `.dshw-api.json` (custom model
+registry). Its accounting ledger `.dshw-usage.json`, per-turn sequence and
+stats caches are **not** included: they are data, not configuration, and
+whole-file sync would mix machines' ledgers. Add other plugin config paths in
+the UI; a trailing `/` syncs a directory, and paths must stay relative to
+`$DSH_HOME`. Credentials, sessions, storages and this plugin's own state are
+rejected.
 
 ## How it works
 

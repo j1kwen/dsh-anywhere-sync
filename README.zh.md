@@ -37,6 +37,7 @@ dsh plugin --profile desktop add /path/to/dsh-anywhere-sync
 | 插件清单 | `<profile>/package.json` | `profile/<profile>/package.json` | 开 |
 | 本地插件源码 | `link:` / `file:` / 绝对路径依赖的插件目录 | `local-plugins/<包名>/…` | 开 |
 | 插件配置 | `<profile>/cordis.patch.yml` | `profile/<profile>/cordis.patch.yml` | 开 |
+| 插件数据 | 设置页列出的 `$DSH_HOME` 下文件 | `plugin-data/<路径>` | 开 |
 | 依赖锁文件 | `<profile>/pnpm-lock.yaml`、`pnpm-workspace.yaml` | 同左 | 开 |
 | 其他 profile 文件 | profile 目录中的其余配置文件（预设、`config.toml` 等） | `profile/<profile>/…` | 关 |
 | 技能 | `~/.agents/skills/`、`~/.agents/.skill-lock.json` | `skills/…` | 关 |
@@ -45,7 +46,7 @@ dsh plugin --profile desktop add /path/to/dsh-anywhere-sync
 
 **本机路径不会外传。** `package.json` 与 `pnpm-lock.yaml` 在同步前会被投影成“可移植形式”：`link:`、`file:`、`workspace:` 以及绝对路径依赖（包括本插件自己的 `link:` 安装）不会写进仓库，对应的 bundle 条目也会一并移除。拉到远端清单时采用合并而不是覆盖，各机器保留自己的本地链接。换机器后第一次安装依赖时，包管理器会按本机清单把链接条目补回锁文件。
 
-**插件本身也会同步。** “本地插件源码”会读取 profile 里所有 `link:`/`file:`/绝对路径依赖的插件目录，把代码（不含 `node_modules`、`.git`、疑似密钥文件）放到仓库的 `local-plugins/<包名>/`。拉取时：
+“本地插件源码”会读取 profile 里 `link:`/`file:`/绝对路径依赖的插件目录（本插件自身除外），把代码（不含 `node_modules`、`.git`、疑似密钥文件）放到仓库的 `local-plugins/<包名>/`。拉取时：
 
 - 本机已经有这个本地依赖 → 直接写回它的源目录；
 - 本机没有 → 写入 `$DSH_HOME/anywhere-sync/local-plugins/<包名>`，并自动在 profile 清单里加上 `link:` 依赖，随后安装依赖；需要启用为 Harness 插件时，在插件页把对应的 bundle 打开一次（插件本体的 bundle 在首次安装时就已经存在）；
@@ -54,6 +55,12 @@ dsh plugin --profile desktop add /path/to/dsh-anywhere-sync
 **本插件自身默认不参与“本地插件源码”同步。** 它的源码不会进入共享仓库，因此本机的开发版不会覆盖另一台机器上从 GitHub 安装的版本；本插件的设置保存在 `$DSH_HOME/anywhere-sync`，不在 profile 里，也不会被同步。需要刻意同步本插件源码时，可在 **设置 → 配置同步 → 不同步本插件自身** 关闭该开关。
 
 新机器仍需先安装一次本插件，才能进入设置页完成首次同步。
+
+## 插件数据
+
+有些插件不把设置放在 `cordis.patch.yml`，而是放在 `$DSH_HOME` 下的文件里。开启“插件数据”后，设置页列出的文件或目录会同步到仓库的 `plugin-data/<路径>`。
+
+默认包含 dsh-whale-widget 的 `.dshw-size.json`（外观/开关）、`.dshw-bubble.json`（泡泡布局）和 `.dshw-api.json`（自定义模型注册表）。它的账本 `.dshw-usage.json`、每轮 seq 和统计缓存**不在默认列表**：这些是数据而不是配置，整文件同步会把不同机器的账本混在一起。其它插件的配置路径可在设置页添加；路径必须以 `/` 结尾表示目录，且只能是 `$DSH_HOME` 下的相对路径。凭据、会话、存储目录和本插件自己的状态会被拒绝。
 
 ## 开始使用
 

@@ -53,7 +53,7 @@ assert.equal(result.status, 200)
 assert.equal(result.body.ok, true)
 assert.equal(result.body.value.repoConfigured, false)
 assert.equal(result.body.value.running, false)
-assert.ok(Array.isArray(result.body.value.items) && result.body.value.items.length === 6)
+assert.ok(Array.isArray(result.body.value.items) && result.body.value.items.length === 7)
 
 // Calling sync before configuration is a normal, recorded failure.
 result = await call('/sync', { method: 'POST', body: JSON.stringify({ mode: 'both' }) })
@@ -84,11 +84,18 @@ assert.equal(result.body.value.running, false)
 assert.equal(result.body.value.lastResult.error, null, JSON.stringify(result.body.value.lastResult.error))
 assert.ok(result.body.value.lastResult.pushedTotal >= 4)
 
-for (const item of ['plugins', 'localPlugins', 'pluginConfig', 'lock', 'profileFiles', 'skills']) {
+for (const item of ['plugins', 'localPlugins', 'pluginConfig', 'pluginData', 'lock', 'profileFiles', 'skills']) {
   result = await call(`/files?item=${item}`)
   assert.equal(result.status, 200, `${item}: ${JSON.stringify(result.body)}`)
   assert.equal(result.body.value.item, item)
 }
+result = await call('/config', {
+  method: 'POST',
+  body: JSON.stringify({ pluginDataPaths: ['.dshw-size.json', '../escape', '/absolute', 'profiles/desktop'] }),
+})
+assert.equal(result.status, 200, JSON.stringify(result.body))
+assert.deepEqual(result.body.value.pluginDataPaths, ['.dshw-size.json'])
+
 result = await call('/files?item=plugins')
 assert.equal(result.status, 200)
 assert.ok(result.body.value.files.some(file => file.path.endsWith('package.json')))
