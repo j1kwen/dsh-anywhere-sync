@@ -9,7 +9,7 @@
 
 [English README](README.md)
 
-设置入口：**Settings → Anywhere Sync**（`settings.section`）。
+设置入口：**设置 → 配置同步**（`settings.section`）。
 
 ## 安装
 
@@ -19,7 +19,7 @@
 dsh plugin --profile desktop add j1kwen/dsh-anywhere-sync
 ```
 
-安装后重启 Harness，打开 **设置 → Anywhere Sync**。
+安装后重启 Harness，打开 **设置 → 配置同步**。
 
 也可以从本地目录或 Release 的 tarball 安装：
 
@@ -57,7 +57,7 @@ dsh plugin --profile desktop add /path/to/dsh-anywhere-sync
 
 1. 在 GitHub 创建一个**私有**仓库（可以勾选 “Add a README” 初始化 `main` 分支）。
 2. 创建 Personal Access Token（classic 的 `repo` scope，或 fine-grained 的 Contents: Read and write）。界面里的“创建 GitHub 令牌”按钮会打开对应页面。
-3. 打开 **设置 → Anywhere Sync**，填写仓库地址（`owner/repo` 或 `https://github.com/owner/repo`）、分支和令牌，点 **保存并连接**。
+3. 打开 **设置 → 配置同步**，填写仓库地址（`owner/repo` 或 `https://github.com/owner/repo`）、分支和令牌，点 **保存并连接**。
 4. 点 **立即同步**。第一次同步后，在另一台机器安装本插件并重复第 3 步即可拉取同一套配置。
 5. 打开 **定时同步**（默认 15 分钟）或 **启动时同步**，让“一处修改，多处生效”自动完成。
 

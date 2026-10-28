@@ -32,7 +32,7 @@ switch. A change made on one machine lands on the others at their next sync.
   their lockfile blocks are projected out before anything is pushed.
 - **Agent tool** — `anywhere_sync` exposes the same `status` / `sync` / `pull` /
   `push` / `install` operations to the model.
-- **UI in Settings → Anywhere Sync** — status, per-item file lists, conflict
+- **UI in Settings → Config Sync** — status, per-item file lists, conflict
   resolution, install and sync controls.
 
 ## Install
@@ -43,7 +43,7 @@ Requirements: DeepSeek Harness with the Web UI, Node.js 20+, and `git`.
 dsh plugin --profile desktop add j1kwen/dsh-anywhere-sync
 ```
 
-Then restart Harness and open **Settings → Anywhere Sync**.
+Then restart Harness and open **Settings → Config Sync**.
 
 From a local checkout or the release tarball:
 
@@ -60,7 +60,7 @@ makes it installable as a bundle.
 1. Create a **private** Git repository for the synchronized configuration.
 2. Create a Personal Access Token with `repo` (classic) or Contents read/write
    (fine-grained) access to it.
-3. Open **Settings → Anywhere Sync**, enter the repository URL, branch and token,
+3. Open **Settings → Config Sync**, enter the repository URL, branch and token,
    then choose **Save and connect**.
 4. Choose **Sync now**. On another machine, install this plugin, enter the same
    repository and token, and sync.

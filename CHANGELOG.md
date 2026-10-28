@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+- Restore the settings navigation and page label to **配置同步** (zh) /
+  **Config Sync** (en). The package and repository name remain
+  `dsh-anywhere-sync` / Anywhere Sync.
+
 ## 1.2.0
 
 - Rename the plugin to **Anywhere Sync** / `dsh-anywhere-sync`: package, GitHub
@@ -40,4 +46,4 @@
 
 - Initial release: six settings items, three-way sync, conflict modes, backups,
   scheduled/startup sync, dependency install, `anywhere_sync` agent tool and the
-  Settings → Anywhere Sync page.
+  Settings → Config Sync page.

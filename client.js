@@ -17,8 +17,8 @@ window.__ModuleLoader__.load({
     const POLL_MS = 3500
 
     const zh = {
-      nav: 'Anywhere Sync',
-      title: 'Anywhere Sync',
+      nav: '配置同步',
+      title: '配置同步',
       subtitle: '用 GitHub 私有仓库在多台电脑之间共享 Harness 配置、插件与插件设置；每一类内容都可以单独开关。',
       statusIdle: '读取中',
       statusNotConfigured: '未配置',
@@ -170,8 +170,8 @@ window.__ModuleLoader__.load({
     }
 
     const en = {
-      nav: 'Anywhere Sync',
-      title: 'Anywhere Sync',
+      nav: 'Config Sync',
+      title: 'Config Sync',
       subtitle: 'Share Harness configuration, plugins and plugin settings across machines through a private GitHub repository. Every category can be enabled separately.',
       statusIdle: 'Loading',
       statusNotConfigured: 'Not configured',
