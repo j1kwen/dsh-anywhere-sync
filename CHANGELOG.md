@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.1
+
+- Keep the **Plugin data** path list when the running Host process has not
+  loaded 1.4.0 yet. Saving used to send the paths to an older Host, which
+  ignored the field and returned a status without it; the client then cleared
+  the list. The card now shows a restart warning, keeps the list, and disables
+  Save until the Host supports the field.
+- Validate paths in the client and name the offending line. Require a
+  non-empty, pluginData-capable Host response before discarding edits.
+
 ## 1.4.0
 
 - New **Plugin data** sync item for plugin-owned configuration files under

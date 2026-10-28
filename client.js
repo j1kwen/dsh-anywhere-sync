@@ -61,6 +61,9 @@ window.__ModuleLoader__.load({
       pluginDataCard: '插件数据文件',
       pluginDataCardHint: '每行一个相对 $DSH_HOME 的文件或目录（目录以 / 结尾）。默认包含 dsh-whale-widget 的 .dshw-size.json、.dshw-bubble.json、.dshw-api.json；账本、统计、缓存和凭据不要加入。',
       pluginDataSave: '保存清单',
+      pluginDataLine: '路径',
+      pluginDataRejected: '所有路径都被拒绝：只能填写 $DSH_HOME 下、不含凭据的相对路径。',
+      hostRestartNeeded: '当前运行的 Host 半还是旧版本，保存不会生效。请完全退出并重启 Harness 后重试；列表会保留。',
       itemsCardHint: '只同步已开启的项目；关闭的项目会原样保留在仓库和本机。',
       itemPlugins: '插件清单',
       itemPluginsHint: 'package.json：已安装插件、版本与 bundle 启用列表；本机 link:/file: 依赖不会上传。',
@@ -221,6 +224,9 @@ window.__ModuleLoader__.load({
       pluginDataCard: 'Plugin data files',
       pluginDataCardHint: 'One path per line, relative to $DSH_HOME (a trailing slash means a directory). Defaults include dsh-whale-widget’s .dshw-size.json, .dshw-bubble.json and .dshw-api.json; do not add ledgers, caches or credentials.',
       pluginDataSave: 'Save list',
+      pluginDataLine: 'Line',
+      pluginDataRejected: 'All paths were rejected: use relative paths under $DSH_HOME without credentials.',
+      hostRestartNeeded: 'The running Host half is still an older version, so saving has no effect. Fully quit and restart Harness, then try again; the list is kept.',
       itemsCardHint: 'Only enabled items sync. Disabled items stay untouched on both sides.',
       itemPlugins: 'Plugin manifest',
       itemPluginsHint: 'package.json: installed plugins, versions and the bundle enable list; machine-local link:/file: specs are not published.',
@@ -558,6 +564,33 @@ window.__ModuleLoader__.load({
       return snapshot
     }
 
+    /** Defaults shown even when the running Host predates the pluginData item. */
+    const FALLBACK_PLUGIN_DATA_PATHS = ['.dshw-size.json', '.dshw-bubble.json', '.dshw-api.json']
+
+    /**
+     * Client-side mirror of the Host path rules. Catching an invalid line here
+     * keeps the editable list intact instead of sending a request the Host
+     * will silently normalize down to an empty list.
+     */
+    function pluginDataPathProblem(value) {
+      if (typeof value !== 'string' || value.trim() === '') return '路径为空'
+      let path = value.trim().replace(/\\/g, '/')
+      if (path.startsWith('/') || /^[A-Za-z]:/.test(path) || path.startsWith('~') || path.includes('$')) {
+        return '请写相对 $DSH_HOME 的路径，不要写绝对路径、~ 或 $DSH_HOME'
+      }
+      const directory = path.endsWith('/')
+      path = path.replace(/^\.\/+/, '').replace(/\/+/g, '/').replace(/\/+$/, '')
+      if (path === '') return '路径为空'
+      const segments = path.split('/')
+      if (segments.some(segment => segment === '' || segment === '.' || segment === '..')) return '不能包含空段、. 或 ..'
+      const banned = /^(?:credential|credentials|secret|secrets|token|tokens|password|passwords|auth|anywhere-sync|profiles|storages|sessions|node_modules|\.git)$/i
+      if (segments.some(segment => banned.test(segment) || /^\.env(\..*)?$/i.test(segment)
+        || /^id_(rsa|ed25519|ecdsa|dsa)/i.test(segment) || /\.(pem|key|p12|pfx|jks|keystore)$/i.test(segment))) {
+        return '包含凭据或受保护的路径'
+      }
+      return null
+    }
+
     function Section(props) {
       const locale = props.locale
       const localeSnap = useLocaleSnapshot(locale)
@@ -630,7 +663,7 @@ window.__ModuleLoader__.load({
       // The plugin-data path list is editable; a poll must not overwrite edits.
       React.useEffect(() => {
         if (status === null || dataPathsDirty) return
-        const paths = Array.isArray(status.pluginDataPaths) ? status.pluginDataPaths : []
+        const paths = Array.isArray(status.pluginDataPaths) ? status.pluginDataPaths : FALLBACK_PLUGIN_DATA_PATHS
         setDataPathsText(paths.join('\n'))
       }, [status?.pluginDataPaths, dataPathsDirty])
 
@@ -806,9 +839,29 @@ window.__ModuleLoader__.load({
 
       const saveDataPaths = React.useCallback(async () => {
         const paths = dataPathsText.split('\n').map(line => line.trim()).filter(line => line !== '')
-        const saved = await commitSettings({ pluginDataPaths: paths }, 'savedNotice')
-        if (saved) setDataPathsDirty(false)
-      }, [commitSettings, dataPathsText])
+        for (let index = 0; index < paths.length; index += 1) {
+          const problem = pluginDataPathProblem(paths[index])
+          if (problem !== null) {
+            setNotice({ tone: 'error', text: `${tr('pluginDataLine')} ${index + 1}: ${problem}` })
+            return
+          }
+        }
+        if (!Array.isArray(status?.pluginDataPaths)) {
+          setNotice({ tone: 'error', text: tr('hostRestartNeeded') })
+          return
+        }
+        const value = await commitSettings({ pluginDataPaths: paths }, 'savedNotice')
+        if (value === false) return
+        if (!Array.isArray(value.pluginDataPaths)) {
+          setNotice({ tone: 'error', text: tr('hostRestartNeeded') })
+          return
+        }
+        if (value.pluginDataPaths.length === 0 && paths.length > 0) {
+          setNotice({ tone: 'error', text: tr('pluginDataRejected') })
+          return
+        }
+        setDataPathsDirty(false)
+      }, [commitSettings, dataPathsText, status, tr])
 
       if (loadFailure !== null && status === null) {
         return h('section', { className: 'as-root' },
@@ -1052,6 +1105,10 @@ window.__ModuleLoader__.load({
             })),
 
           h(Card, { title: tr('pluginDataCard'), hint: tr('pluginDataCardHint') },
+            Array.isArray(status.pluginDataPaths)
+              ? null
+              : h('div', { className: 'as-banner as-warn' },
+                  h('div', { className: 'as-banner-text' }, tr('hostRestartNeeded'))),
             h('textarea', {
               className: 'as-textarea',
               rows: 4,
@@ -1067,7 +1124,7 @@ window.__ModuleLoader__.load({
               h('button', {
                 type: 'button',
                 className: 'as-btn as-primary',
-                disabled: busy !== null || !dataPathsDirty,
+                disabled: busy !== null || !dataPathsDirty || !Array.isArray(status.pluginDataPaths),
                 onClick: () => { void saveDataPaths() },
               }, tr('pluginDataSave')))),
 
@@ -1393,7 +1450,7 @@ window.__ModuleLoader__.load({
       inject: ['slots', 'locale'],
       apply(ctx) {
         try {
-          console.info('[anywhere-sync] settings client 1.4.0 loaded')
+          console.info('[anywhere-sync] settings client 1.4.1 loaded')
         } catch {
           // Console may be unavailable.
         }
