@@ -230,6 +230,39 @@ assert.equal(stableB.pulled.length, 0, 'machine B has nothing to pull')
 assert.match(readFileSync(join(runtimeB.profileDir, 'cordis.patch.yml'), 'utf8'), /sepia/)
 assert.ok(existsSync(join(runtimeB.skillsRoot, 'lark-demo', 'SKILL.md')))
 
+// This plugin's own source is excluded from local-plugin sync by default.
+const selfPlugin = join(sandbox, 'self-plugin')
+mkdirSync(selfPlugin, { recursive: true })
+write(join(selfPlugin, 'package.json'), JSON.stringify({
+  name: 'dsh-anywhere-sync',
+  version: '9.9.9',
+  type: 'module',
+  dsh: { bundle: { patch: './cordis.patch.yml' } },
+}, null, 2))
+write(join(selfPlugin, 'index.js'), 'export function apply() {}\n')
+write(join(selfPlugin, 'cordis.patch.yml'), "- insert:\n    - id: anywhere-sync\n      name: dsh-anywhere-sync\n")
+const selfManifestPath = join(profile, 'package.json')
+const selfManifest = JSON.parse(readFileSync(selfManifestPath, 'utf8'))
+selfManifest.dependencies['dsh-anywhere-sync'] = `link:${selfPlugin}`
+writeFileSync(selfManifestPath, `${JSON.stringify(selfManifest, null, 2)}\n`)
+
+await engine.saveConfig({ excludeSelf: true })
+const beforeSelf = (await engine.status()).items.find(item => item.id === 'localPlugins').count
+const excludedSelf = await engine.sync('both')
+assert.equal(excludedSelf.error, null)
+assert.ok(!excludedSelf.pushed.some(entry => entry.path.startsWith('local-plugins/dsh-anywhere-sync/')), 'self source must not sync by default')
+assert.equal((await engine.status()).items.find(item => item.id === 'localPlugins').count, beforeSelf, 'self source is not counted')
+
+await engine.saveConfig({ excludeSelf: false })
+const includedSelf = await engine.sync('both')
+assert.ok(includedSelf.pushed.some(entry => entry.path === 'local-plugins/dsh-anywhere-sync/index.js'), 'self source can be included explicitly')
+assert.ok(tree().includes('local-plugins/dsh-anywhere-sync/index.js'))
+
+await engine.saveConfig({ excludeSelf: true })
+const ignoredRemoteSelf = await engine.sync('both')
+assert.equal(ignoredRemoteSelf.error, null)
+assert.ok(!ignoredRemoteSelf.pulled.some(entry => entry.path.startsWith('local-plugins/dsh-anywhere-sync/')), 'remote self source is ignored when excluded')
+
 const status = await engine.status()
 assert.equal(status.repoConfigured, true)
 assert.equal(status.running, false)

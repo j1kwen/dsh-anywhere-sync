@@ -103,6 +103,12 @@ On pull:
   dependency; enable its bundle in the Plugins page if it is new;
 - plugin code changes take effect after a Harness restart.
 
+**This plugin itself is excluded by default.** Its own source is not carried in
+the shared repository, so a local development copy cannot overwrite a
+GitHub-installed copy on another machine. The switch under **Settings → Config
+Sync → Exclude this plugin itself** controls it; the plugin's own settings live
+in `$DSH_HOME/anywhere-sync` and are never synced.
+
 New machines still install this plugin once to get the settings page and the
 initial sync.
 

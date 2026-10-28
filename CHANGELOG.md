@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.3.0
+
+- Install dependencies with `--no-frozen-lockfile`. A pulled manifest can gain a
+  newly registered local plugin, which the pulled (sanitized) lockfile cannot
+  contain; pnpm's CI/frozen mode rejected the install with
+  "specifiers in the lockfile don't match specifiers in package.json".
+- Exclude this plugin itself from **local plugin source** sync by default
+  (`excludeSelf`). A local development copy therefore no longer replaces a
+  GitHub-installed copy on another machine. The plugin's own settings live in
+  `$DSH_HOME/anywhere-sync`, outside the profile, and are not synced. The
+  setting can be turned off in the UI if you intentionally want to carry the
+  plugin's source.
+- If an earlier version already registered this plugin as a managed local link
+  on a machine, reinstall it from GitHub once; the exclusion prevents it from
+  recurring.
+
 ## 1.2.3
 
 - Fix the first-run settings page crash
