@@ -38,7 +38,7 @@ await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
 const origin = `http://127.0.0.1:${server.address().port}`
 
 async function call(path, options = {}) {
-  const response = await fetch(`${origin}/harness-sync/api${path}`, {
+  const response = await fetch(`${origin}/anywhere-sync/api${path}`, {
     ...options,
     headers: {
       ...(options.body === undefined ? {} : { 'content-type': 'application/json', origin }),
@@ -128,7 +128,7 @@ const strictServer = createServer((request, response) => {
 })
 await new Promise(resolve => strictServer.listen(0, '127.0.0.1', resolve))
 const strictOrigin = `http://127.0.0.1:${strictServer.address().port}`
-const refused = await fetch(`${strictOrigin}/harness-sync/api/status`)
+const refused = await fetch(`${strictOrigin}/anywhere-sync/api/status`)
 assert.equal(refused.status, 403)
 console.log('connection fence test passed')
 strictServer.close()

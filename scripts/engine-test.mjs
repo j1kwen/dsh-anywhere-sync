@@ -48,7 +48,7 @@ const manifest = (extraDeps = {}) => JSON.stringify({
   dsh: { profile: { bundles: [...Object.keys(extraDeps), '@deepseek-ai/dsh-base', 'dsh-better-sidebar'] } },
 }, null, 2)
 write(join(profile, 'package.json'), manifest({
-  'dsh-harness-sync': 'link:/Users/test/dsh-plugins/harness-sync',
+  'dsh-anywhere-sync': 'link:/Users/test/dsh-plugins/anywhere-sync',
   'test-local-plugin': `link:${localPlugin}`,
 }))
 write(join(profile, 'cordis.patch.yml'), '- id: ui-theme\n  config:\n    preference: system\n')
@@ -65,9 +65,9 @@ importers:
       dsh-better-sidebar:
         specifier: 0.28.1
         version: 0.28.1
-      dsh-harness-sync:
-        specifier: link:/Users/test/dsh-plugins/harness-sync
-        version: link:../../../dsh-plugins/harness-sync
+      dsh-anywhere-sync:
+        specifier: link:/Users/test/dsh-plugins/anywhere-sync
+        version: link:../../../dsh-plugins/anywhere-sync
 `)
 write(join(profile, 'pnpm-workspace.yaml'), 'packages:\n  - .\n')
 write(join(profile, 'config.toml'), 'api_key = "must-never-sync"\n')
@@ -114,7 +114,7 @@ assert.ok(!files.includes('profile/desktop/config.toml'), 'secret-looking file m
 const remoteManifest = execFileSync('git', ['--git-dir', remote, 'show', 'main:profile/desktop/package.json'], { encoding: 'utf8' })
 const remoteLock = execFileSync('git', ['--git-dir', remote, 'show', 'main:profile/desktop/pnpm-lock.yaml'], { encoding: 'utf8' })
 assert.ok(!/link:/.test(remoteManifest), 'local link dependency must not be published')
-assert.ok(!/dsh-harness-sync/.test(remoteManifest), 'local link bundle must not be published')
+assert.ok(!/dsh-anywhere-sync/.test(remoteManifest), 'local link bundle must not be published')
 assert.ok(!/test-local-plugin/.test(remoteManifest), 'local plugin dependency/bundle must not be published as a path')
 assert.ok(!/link:/.test(remoteLock), 'local link lock block must not be published')
 assert.match(remoteLock, /dsh-better-sidebar/)
@@ -138,7 +138,7 @@ assert.ok(pull.backup !== null, 'overwrite should create a backup')
 // Local edit -> push.
 write(join(profile, 'package.json'), manifest({
   dshmarket: '1.70.2',
-  'dsh-harness-sync': 'link:/Users/test/dsh-plugins/harness-sync',
+  'dsh-anywhere-sync': 'link:/Users/test/dsh-plugins/anywhere-sync',
   'test-local-plugin': `link:${localPlugin}`,
 }))
 const push = await engine.sync('both')
@@ -199,8 +199,8 @@ runtimeB.skillsLockPath = join(sandbox, 'machine-b', '.agents', '.skill-lock.jso
 mkdirSync(runtimeB.profileDir, { recursive: true })
 writeFileSync(join(runtimeB.profileDir, 'package.json'), JSON.stringify({
   name: 'dsh-profile-desktop',
-  dependencies: { 'dsh-harness-sync': 'link:/Users/machine-b/dsh-plugins/harness-sync' },
-  dsh: { profile: { bundles: ['dsh-harness-sync'] } },
+  dependencies: { 'dsh-anywhere-sync': 'link:/Users/machine-b/dsh-plugins/anywhere-sync' },
+  dsh: { profile: { bundles: ['dsh-anywhere-sync'] } },
 }, null, 2))
 const engineB = new SyncEngine({ runtime: runtimeB, env: { PATH: process.env.PATH, HOME: join(sandbox, 'machine-b') } })
 await engineB.saveConfig({
@@ -214,14 +214,14 @@ const joined = await engineB.sync('both')
 assert.equal(joined.error, null)
 const manifestB = readFileSync(join(runtimeB.profileDir, 'package.json'), 'utf8')
 assert.match(manifestB, /dshmarket/)
-assert.match(manifestB, /link:\/Users\/machine-b\/dsh-plugins\/harness-sync/, 'machine B keeps its own local link')
-assert.match(manifestB, /dsh-harness-sync/, 'machine B keeps its own bundle entry')
+assert.match(manifestB, /link:\/Users\/machine-b\/dsh-plugins\/anywhere-sync/, 'machine B keeps its own local link')
+assert.match(manifestB, /dsh-anywhere-sync/, 'machine B keeps its own bundle entry')
 assert.ok(!/Users\/test/.test(manifestB), 'machine A\'s path must not reach B')
-const managedB = join(sandbox, 'machine-b', 'harness-sync', 'local-plugins', 'test-local-plugin')
+const managedB = join(sandbox, 'machine-b', 'anywhere-sync', 'local-plugins', 'test-local-plugin')
 assert.ok(existsSync(join(managedB, 'package.json')), 'machine B materializes the local plugin')
 assert.ok(existsSync(join(managedB, 'index.js')), 'machine B materializes the source')
 assert.match(manifestB, /test-local-plugin/, 'machine B registers the local plugin')
-assert.match(manifestB, /link:.*harness-sync\/local-plugins\/test-local-plugin/, 'machine B links its managed copy')
+assert.match(manifestB, /link:.*anywhere-sync\/local-plugins\/test-local-plugin/, 'machine B links its managed copy')
 assert.ok(joined.pulled.some(entry => entry.path === 'local-plugins/test-local-plugin/index.js'))
 const stableB = await engineB.sync('both')
 assert.equal(stableB.error, null)

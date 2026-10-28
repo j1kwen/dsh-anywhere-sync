@@ -1,31 +1,31 @@
-# 配置同步 · Config Sync
+# Anywhere Sync · 配置同步
 
-[![CI](https://github.com/j1kwen/dsh-harness-sync/actions/workflows/ci.yml/badge.svg)](https://github.com/j1kwen/dsh-harness-sync/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/github/license/j1kwen/dsh-harness-sync)](LICENSE)
+[![CI](https://github.com/j1kwen/dsh-anywhere-sync/actions/workflows/ci.yml/badge.svg)](https://github.com/j1kwen/dsh-anywhere-sync/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/github/license/j1kwen/dsh-anywhere-sync)](LICENSE)
 
-![配置同步](assets/icon-180.png)
+![Anywhere Sync](assets/icon-180.png)
 
 用**一个私有 Git 仓库**在多台电脑之间共享 Harness 的 profile 配置、插件清单、插件设置、依赖锁、本地插件源码与技能。每一类内容都可以单独开关；一台机器修改后，其他机器在下一次同步时生效。
 
 [English README](README.md)
 
-设置入口：**Settings → 配置同步**（`settings.section`）。
+设置入口：**Settings → Anywhere Sync**（`settings.section`）。
 
 ## 安装
 
 要求：带 Web UI 的 DeepSeek Harness、Node.js 20+、本机有 `git`。
 
 ```bash
-dsh plugin --profile desktop add j1kwen/dsh-harness-sync
+dsh plugin --profile desktop add j1kwen/dsh-anywhere-sync
 ```
 
-安装后重启 Harness，打开 **设置 → 配置同步**。
+安装后重启 Harness，打开 **设置 → Anywhere Sync**。
 
 也可以从本地目录或 Release 的 tarball 安装：
 
 ```bash
-dsh plugin --profile desktop add /path/to/dsh-harness-sync
-# 或在插件管理器中选择最新 Release 的 dsh-harness-sync.tgz
+dsh plugin --profile desktop add /path/to/dsh-anywhere-sync
+# 或在插件管理器中选择最新 Release 的 dsh-anywhere-sync.tgz
 ```
 
 仓库声明了 `dsh.bundle` 和 `cordis.patch.yml`，因此可以作为一个 bundle 安装。
@@ -48,7 +48,7 @@ dsh plugin --profile desktop add /path/to/dsh-harness-sync
 **插件本身也会同步。** “本地插件源码”会读取 profile 里所有 `link:`/`file:`/绝对路径依赖的插件目录，把代码（不含 `node_modules`、`.git`、疑似密钥文件）放到仓库的 `local-plugins/<包名>/`。拉取时：
 
 - 本机已经有这个本地依赖 → 直接写回它的源目录；
-- 本机没有 → 写入 `$DSH_HOME/harness-sync/local-plugins/<包名>`，并自动在 profile 清单里加上 `link:` 依赖，随后安装依赖；需要启用为 Harness 插件时，在插件页把对应的 bundle 打开一次（插件本体的 bundle 在首次安装时就已经存在）；
+- 本机没有 → 写入 `$DSH_HOME/anywhere-sync/local-plugins/<包名>`，并自动在 profile 清单里加上 `link:` 依赖，随后安装依赖；需要启用为 Harness 插件时，在插件页把对应的 bundle 打开一次（插件本体的 bundle 在首次安装时就已经存在）；
 - 插件代码更新后需要重启 Harness 才会加载。
 
 所以本插件自己也会出现在“本地插件源码”里：在一台机器上改代码并同步，另一台机器拉到后会更新自己的安装目录。新机器仍需先安装一次本插件，才能进入设置页完成首次同步。
@@ -57,7 +57,7 @@ dsh plugin --profile desktop add /path/to/dsh-harness-sync
 
 1. 在 GitHub 创建一个**私有**仓库（可以勾选 “Add a README” 初始化 `main` 分支）。
 2. 创建 Personal Access Token（classic 的 `repo` scope，或 fine-grained 的 Contents: Read and write）。界面里的“创建 GitHub 令牌”按钮会打开对应页面。
-3. 打开 **设置 → 配置同步**，填写仓库地址（`owner/repo` 或 `https://github.com/owner/repo`）、分支和令牌，点 **保存并连接**。
+3. 打开 **设置 → Anywhere Sync**，填写仓库地址（`owner/repo` 或 `https://github.com/owner/repo`）、分支和令牌，点 **保存并连接**。
 4. 点 **立即同步**。第一次同步后，在另一台机器安装本插件并重复第 3 步即可拉取同一套配置。
 5. 打开 **定时同步**（默认 15 分钟）或 **启动时同步**，让“一处修改，多处生效”自动完成。
 
@@ -65,7 +65,7 @@ dsh plugin --profile desktop add /path/to/dsh-harness-sync
 
 ## 冲突与数据安全
 
-- 每次写盘前把将被覆盖的文件复制到 `$DSH_HOME/harness-sync/backups/<时间戳>/`，只保留最近 10 份。
+- 每次写盘前把将被覆盖的文件复制到 `$DSH_HOME/anywhere-sync/backups/<时间戳>/`，只保留最近 10 份。
 - 同步基于三方比较（本机 / 远端 / 上次同步的哈希），只有真正“两边都改过”的同一文件才算冲突。
 - 冲突策略：**远端优先**（默认，适合新机器并入共享配置）、**本地优先**、**保留冲突**（在页面逐个选择保留哪一边）。
 - 每次推送只 `git add` 本次实际修改的路径，仓库里其他 profile 或其他工具的文件不会被碰。
@@ -78,9 +78,9 @@ dsh plugin --profile desktop add /path/to/dsh-harness-sync
 
 ## 安全边界
 
-- 令牌只保存在 `$DSH_HOME/harness-sync/credentials.json`（权限 `0600`），通过 `GIT_ASKPASS` 临时环境变量交给 git，**不写入仓库、不写进 URL、不返回给浏览器**。
-- 也可以通过环境变量提供令牌（按优先级）：`HARNESS_SYNC_TOKEN`、`GH_TOKEN`、`GITHUB_TOKEN`。
-- HTTP 接口挂在 `/harness-sync/api`，复用 Harness Connection 的 Host/Origin 与登录校验；没有该服务时只接受 loopback。修改类请求还要求同源 `Origin`。
+- 令牌只保存在 `$DSH_HOME/anywhere-sync/credentials.json`（权限 `0600`），通过 `GIT_ASKPASS` 临时环境变量交给 git，**不写入仓库、不写进 URL、不返回给浏览器**。
+- 也可以通过环境变量提供令牌（按优先级）：`ANYWHERE_SYNC_TOKEN`、`GH_TOKEN`、`GITHUB_TOKEN`。
+- HTTP 接口挂在 `/anywhere-sync/api`，复用 Harness Connection 的 Host/Origin 与登录校验；没有该服务时只接受 loopback。修改类请求还要求同源 `Origin`。
 - 插件不读取、不同步 `~/.dsh/.credentials.yaml`、会话记录或工作区文件。
 - 需要本机安装 `git`；依赖安装优先使用启动器发布的包管理器，否则使用 PATH 上的 `pnpm`。
 - 面向 macOS / Linux / Windows；CI 在 Linux + Node 20/22 上运行离线引擎与 HTTP 测试，Windows 路径处理使用 Node 的 `path` API，但未经 CI 覆盖。
@@ -97,11 +97,11 @@ fetch origin <branch> → reset --hard（本地镜像 = 远端真相）
    ↓ 更新 base 哈希
 ```
 
-状态在 `$DSH_HOME/harness-sync/state.json`，配置在 `config.json`，仓库镜像在 `repo/`。当前同步的 profile 就是插件所在的那个 profile，界面会显示 profile 名。
+状态在 `$DSH_HOME/anywhere-sync/state.json`，配置在 `config.json`，仓库镜像在 `repo/`。当前同步的 profile 就是插件所在的那个 profile，界面会显示 profile 名。
 
 ## 智能体工具
 
-插件同时注册 `harness_sync` 工具，参数 `action` 为 `status` / `sync` / `pull` / `push` / `install`。它调用与界面完全相同的 Host 实现，不能修改仓库地址、同步项或读取令牌。
+插件同时注册 `anywhere_sync` 工具，参数 `action` 为 `status` / `sync` / `pull` / `push` / `install`。它调用与界面完全相同的 Host 实现，不能修改仓库地址、同步项或读取令牌。
 
 ## 自测
 
@@ -120,15 +120,15 @@ GitHub Actions 在每次 push 和 PR 上运行同样的检查（Node 20/22）。
 
 ## 发布与签名
 
-- Release 由 GitHub Actions 从**签名的 tag** 构建，发布 `dsh-harness-sync.tgz` 与 `SHA256SUMS`；
+- Release 由 GitHub Actions 从**签名的 tag** 构建，发布 `dsh-anywhere-sync.tgz` 与 `SHA256SUMS`；
 - tarball 带 Sigstore build provenance，校验和文件带 keyless Sigstore 签名
   （`SHA256SUMS.sigstore.json`）：
 
   ```bash
   sha256sum -c SHA256SUMS
-  gh attestation verify dsh-harness-sync.tgz --repo j1kwen/dsh-harness-sync
+  gh attestation verify dsh-anywhere-sync.tgz --repo j1kwen/dsh-anywhere-sync
   cosign verify-blob --bundle SHA256SUMS.sigstore.json \
-    --certificate-identity-regexp 'https://github.com/j1kwen/dsh-harness-sync/.github/workflows/release.yml@refs/tags/.*' \
+    --certificate-identity-regexp 'https://github.com/j1kwen/dsh-anywhere-sync/.github/workflows/release.yml@refs/tags/.*' \
     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
     SHA256SUMS
   ```

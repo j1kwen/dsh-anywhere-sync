@@ -1,9 +1,9 @@
-# dsh-harness-sync bundle patch.
+# dsh-anywhere-sync bundle patch.
 #
-# Mounts the plugin once. The Host half serves /harness-sync/api and registers
-# the `harness_sync` tool; the Client half contributes the "Config Sync"
+# Mounts the plugin once. The Host half serves /anywhere-sync/api and registers
+# the `anywhere_sync` tool; the Client half contributes the "Anywhere Sync"
 # settings section. Runtime settings (repository, token, selected items) live
-# in $DSH_HOME/harness-sync, never in this row.
+# in $DSH_HOME/anywhere-sync, never in this row.
 - insert:
-    - id: harness-sync
-      name: dsh-harness-sync
+    - id: anywhere-sync
+      name: dsh-anywhere-sync

@@ -1,24 +1,24 @@
 /**
- * dsh-harness-sync — Client half.
+ * dsh-anywhere-sync — Client half.
  *
- * Registers one settings section ("Config Sync"). The page is a thin view over
- * `/harness-sync/api`: it never touches the filesystem and never receives the
+ * Registers one settings section ("Anywhere Sync"). The page is a thin view over
+ * `/anywhere-sync/api`: it never touches the filesystem and never receives the
  * token. Styles use only `--dsw-alias-*` theme tokens so light/dark switching
  * and future token renames degrade gracefully.
  */
 window.__ModuleLoader__.load({
-  id: 'dsh-harness-sync',
+  id: 'dsh-anywhere-sync',
   factory(require) {
     const React = require('react')
     const h = React.createElement
 
-    const NS = 'dsh-harness-sync'
-    const API_PREFIX = 'harness-sync/api'
+    const NS = 'dsh-anywhere-sync'
+    const API_PREFIX = 'anywhere-sync/api'
     const POLL_MS = 3500
 
     const zh = {
-      nav: '配置同步',
-      title: '配置同步',
+      nav: 'Anywhere Sync',
+      title: 'Anywhere Sync',
       subtitle: '用 GitHub 私有仓库在多台电脑之间共享 Harness 配置、插件与插件设置；每一类内容都可以单独开关。',
       statusIdle: '读取中',
       statusNotConfigured: '未配置',
@@ -42,7 +42,7 @@ window.__ModuleLoader__.load({
       tokenPlaceholder: 'github_pat_… 或 ghp_…',
       tokenSaved: '已保存令牌',
       tokenEnv: '令牌来自环境变量',
-      tokenHint: '令牌只保存在本机 $DSH_HOME/harness-sync/credentials.json（权限 0600），不会写进仓库，也不会返回给页面。需要 repo 权限。',
+      tokenHint: '令牌只保存在本机 $DSH_HOME/anywhere-sync/credentials.json（权限 0600），不会写进仓库，也不会返回给页面。需要 repo 权限。',
       createToken: '创建 GitHub 令牌',
       saveConnect: '保存并连接',
       testing: '连接中…',
@@ -170,8 +170,8 @@ window.__ModuleLoader__.load({
     }
 
     const en = {
-      nav: 'Config Sync',
-      title: 'Config Sync',
+      nav: 'Anywhere Sync',
+      title: 'Anywhere Sync',
       subtitle: 'Share Harness configuration, plugins and plugin settings across machines through a private GitHub repository. Every category can be enabled separately.',
       statusIdle: 'Loading',
       statusNotConfigured: 'Not configured',
@@ -195,7 +195,7 @@ window.__ModuleLoader__.load({
       tokenPlaceholder: 'github_pat_… or ghp_…',
       tokenSaved: 'Token saved',
       tokenEnv: 'Token from environment',
-      tokenHint: 'The token stays on this machine in $DSH_HOME/harness-sync/credentials.json (mode 0600). It is never committed and never returned to the page. The repo scope is required.',
+      tokenHint: 'The token stays on this machine in $DSH_HOME/anywhere-sync/credentials.json (mode 0600). It is never committed and never returned to the page. The repo scope is required.',
       createToken: 'Create a GitHub token',
       saveConnect: 'Save and connect',
       testing: 'Connecting…',
@@ -460,12 +460,12 @@ window.__ModuleLoader__.load({
     // ----------------------------------------------------------- components
 
     function Card(props) {
-      return h('section', { className: 'hs-card' },
-        h('div', { className: 'hs-card-head' },
+      return h('section', { className: 'as-card' },
+        h('div', { className: 'as-card-head' },
           h('div', null,
-            h('h3', { className: 'hs-card-title' }, props.title),
-            props.hint === undefined ? null : h('p', { className: 'hs-card-hint' }, props.hint)),
-          props.aside === undefined ? null : h('div', { className: 'hs-card-aside' }, props.aside)),
+            h('h3', { className: 'as-card-title' }, props.title),
+            props.hint === undefined ? null : h('p', { className: 'as-card-hint' }, props.hint)),
+          props.aside === undefined ? null : h('div', { className: 'as-card-aside' }, props.aside)),
         props.children)
     }
 
@@ -475,30 +475,30 @@ window.__ModuleLoader__.load({
         role: 'switch',
         'aria-checked': props.checked === true,
         'aria-label': props.label,
-        className: `hs-switch${props.checked === true ? ' hs-on' : ''}`,
+        className: `as-switch${props.checked === true ? ' as-on' : ''}`,
         disabled: props.disabled === true || props.busy === true,
         onClick: () => props.onChange(props.checked !== true),
-      }, h('span', { className: 'hs-knob' }))
+      }, h('span', { className: 'as-knob' }))
     }
 
     function Row(props) {
-      return h('div', { className: `hs-row${props.last === true ? ' hs-last' : ''}` },
-        h('div', { className: 'hs-row-main' },
-          h('div', { className: 'hs-row-title' }, props.title),
-          props.hint === undefined ? null : h('div', { className: 'hs-row-hint' }, props.hint),
+      return h('div', { className: `as-row${props.last === true ? ' as-last' : ''}` },
+        h('div', { className: 'as-row-main' },
+          h('div', { className: 'as-row-title' }, props.title),
+          props.hint === undefined ? null : h('div', { className: 'as-row-hint' }, props.hint),
           props.extra === undefined ? null : props.extra),
-        h('div', { className: 'hs-row-side' }, props.side))
+        h('div', { className: 'as-row-side' }, props.side))
     }
 
     function Field(props) {
-      return h('label', { className: 'hs-field' },
-        h('span', { className: 'hs-label' }, props.label),
+      return h('label', { className: 'as-field' },
+        h('span', { className: 'as-label' }, props.label),
         props.children,
-        props.hint === undefined ? null : h('span', { className: 'hs-hint' }, props.hint))
+        props.hint === undefined ? null : h('span', { className: 'as-hint' }, props.hint))
     }
 
     function Empty(props) {
-      return h('p', { className: 'hs-empty' }, props.children)
+      return h('p', { className: 'as-empty' }, props.children)
     }
 
     function Section(props) {
@@ -742,17 +742,17 @@ window.__ModuleLoader__.load({
       }, [errorText, openItem])
 
       if (loadFailure !== null && status === null) {
-        return h('section', { className: 'hs-root' },
+        return h('section', { className: 'as-root' },
           h('style', null, CSS),
-          h('div', { className: 'hs-body' },
-            h('div', { className: 'hs-banner hs-error', role: 'alert' }, errorText(loadFailure)),
-            h('button', { type: 'button', className: 'hs-btn', onClick: () => { void refresh() } }, tr('retry'))))
+          h('div', { className: 'as-body' },
+            h('div', { className: 'as-banner as-error', role: 'alert' }, errorText(loadFailure)),
+            h('button', { type: 'button', className: 'as-btn', onClick: () => { void refresh() } }, tr('retry'))))
       }
 
       if (status === null) {
-        return h('section', { className: 'hs-root' },
+        return h('section', { className: 'as-root' },
           h('style', null, CSS),
-          h('div', { className: 'hs-body' }, h(Empty, null, tr('loading'))))
+          h('div', { className: 'as-body' }, h(Empty, null, tr('loading'))))
       }
 
       const running = status.running === true || busy === 'sync'
@@ -799,51 +799,51 @@ window.__ModuleLoader__.load({
         skills: ['itemSkills', 'itemSkillsHint'],
       }
 
-      return h('section', { className: 'hs-root' },
+      return h('section', { className: 'as-root' },
         h('style', null, CSS),
-        h('header', { className: 'hs-head' },
-          h('div', { className: 'hs-title-row' },
-            h('h2', { className: 'hs-title' }, tr('title')),
-            h('span', { className: `hs-pill hs-${statusTone}`, 'aria-live': 'polite' },
-              h('span', { className: 'hs-dot' }),
+        h('header', { className: 'as-head' },
+          h('div', { className: 'as-title-row' },
+            h('h2', { className: 'as-title' }, tr('title')),
+            h('span', { className: `as-pill as-${statusTone}`, 'aria-live': 'polite' },
+              h('span', { className: 'as-dot' }),
               statusLabel)),
-          h('p', { className: 'hs-sub' }, tr('subtitle')),
-          h('div', { className: 'hs-actions' },
+          h('p', { className: 'as-sub' }, tr('subtitle')),
+          h('div', { className: 'as-actions' },
             h('button', {
               type: 'button',
-              className: 'hs-btn hs-primary',
+              className: 'as-btn as-primary',
               disabled: !configured || running || busy !== null || status.gitReady !== true,
               onClick: () => { void startSync('both') },
             }, running ? tr('syncing') : tr('syncNow')),
             h('button', {
               type: 'button',
-              className: 'hs-btn',
+              className: 'as-btn',
               disabled: !configured || running || busy !== null || status.gitReady !== true,
               onClick: () => { void startSync('push') },
             }, tr('uploadOnly')),
             h('button', {
               type: 'button',
-              className: 'hs-btn',
+              className: 'as-btn',
               disabled: !configured || running || busy !== null || status.gitReady !== true,
               onClick: () => { void startSync('pull') },
               }, tr('downloadOnly')))),
-        h('div', { className: 'hs-body' },
+        h('div', { className: 'as-body' },
           loadFailure !== null
-            ? h('div', { className: 'hs-banner hs-error', role: 'alert' }, errorText(loadFailure))
+            ? h('div', { className: 'as-banner as-error', role: 'alert' }, errorText(loadFailure))
             : null,
           notice === null
             ? null
             : h('div', {
-                className: `hs-banner ${notice.tone === 'error' ? 'hs-error' : notice.tone === 'warn' ? 'hs-warn' : 'hs-ok'}`,
+                className: `as-banner ${notice.tone === 'error' ? 'as-error' : notice.tone === 'warn' ? 'as-warn' : 'as-ok'}`,
                 role: notice.tone === 'error' ? 'alert' : 'status',
               },
-              h('span', { className: 'hs-banner-text' }, notice.text),
+              h('span', { className: 'as-banner-text' }, notice.text),
               Array.isArray(notice.branches) && notice.branches.length > 0
-                ? h('span', { className: 'hs-banner-actions' },
+                ? h('span', { className: 'as-banner-actions' },
                     notice.branches.slice(0, 6).map(branch => h('button', {
                       key: branch,
                       type: 'button',
-                      className: 'hs-btn hs-btn-sm',
+                      className: 'as-btn as-btn-sm',
                       onClick: () => {
                         setBranchInput(branch)
                         setNotice(null)
@@ -852,16 +852,16 @@ window.__ModuleLoader__.load({
                 : null),
 
           !configured
-            ? h('div', { className: 'hs-banner hs-info' },
-                h('div', { className: 'hs-banner-text' }, tr('notConnectedHint')),
-                h('div', { className: 'hs-banner-sub' }, tr('firstRunHint')))
+            ? h('div', { className: 'as-banner as-info' },
+                h('div', { className: 'as-banner-text' }, tr('notConnectedHint')),
+                h('div', { className: 'as-banner-sub' }, tr('firstRunHint')))
             : null,
 
           h(Card, { title: tr('repoCard'), hint: tr('repoCardHint') },
-            h('div', { className: 'hs-grid' },
+            h('div', { className: 'as-grid' },
               h(Field, { label: tr('repoUrl') },
                 h('input', {
-                  className: 'hs-input',
+                  className: 'as-input',
                   value: repoInput,
                   placeholder: tr('repoUrlPlaceholder'),
                   spellCheck: false,
@@ -870,23 +870,23 @@ window.__ModuleLoader__.load({
                 })),
               h(Field, { label: tr('branch') },
                 h('input', {
-                  className: 'hs-input',
+                  className: 'as-input',
                   value: branchInput,
                   placeholder: tr('branchPlaceholder'),
                   spellCheck: false,
                   autoComplete: 'off',
                   onChange: (event) => setBranchInput(event.target.value),
                 }))),
-            h('div', { className: 'hs-grid' },
+            h('div', { className: 'as-grid' },
               h(Field, {
                 label: tr('token'),
                 hint: status.tokenSet
                   ? (status.tokenSource === 'env' ? tr('tokenEnv') : tr('tokenSaved'))
                   : undefined,
               },
-                h('div', { className: 'hs-token-row' },
+                h('div', { className: 'as-token-row' },
                   h('input', {
-                    className: 'hs-input hs-mono',
+                    className: 'as-input as-mono',
                     type: showToken ? 'text' : 'password',
                     value: tokenInput,
                     placeholder: status.tokenSet ? '••••••••••••' : tr('tokenPlaceholder'),
@@ -899,14 +899,14 @@ window.__ModuleLoader__.load({
                   }),
                   h('button', {
                     type: 'button',
-                    className: 'hs-btn hs-btn-sm',
+                    className: 'as-btn as-btn-sm',
                     'aria-label': showToken ? tr('hideToken') : tr('showToken'),
                     title: showToken ? tr('hideToken') : tr('showToken'),
                     onClick: () => setShowToken(value => !value),
                   }, showToken ? '•••' : '👁'))),
-              h('div', { className: 'hs-token-side' },
+              h('div', { className: 'as-token-side' },
                 h('a', {
-                  className: 'hs-link',
+                  className: 'as-link',
                   href: 'https://github.com/settings/tokens/new?scopes=repo&description=DeepSeek%20Harness%20Config%20Sync',
                   target: '_blank',
                   rel: 'noreferrer noopener',
@@ -914,48 +914,48 @@ window.__ModuleLoader__.load({
                 status.tokenSet && status.tokenSource === 'file'
                   ? h('button', {
                       type: 'button',
-                      className: 'hs-link hs-link-button',
+                      className: 'as-link as-link-button',
                       disabled: busy !== null,
                       onClick: () => { if (window.confirm(tr('clearTokenConfirm'))) void clearToken() },
                     }, tr('clearToken'))
                   : null)),
-            h('p', { className: 'hs-hint hs-hint-wide' }, tr('tokenHint')),
-            h('div', { className: 'hs-actions hs-actions-tight' },
+            h('p', { className: 'as-hint as-hint-wide' }, tr('tokenHint')),
+            h('div', { className: 'as-actions as-actions-tight' },
               h('button', {
                 type: 'button',
-                className: 'hs-btn hs-primary',
+                className: 'as-btn as-primary',
                 disabled: busy !== null || repoInput.trim() === '',
                 onClick: () => { void saveAndConnect() },
               }, busy === 'connect' ? tr('testing') : tr('saveConnect')),
               h('button', {
                 type: 'button',
-                className: 'hs-btn',
+                className: 'as-btn',
                 disabled: busy !== null || repoInput.trim() === '',
                 onClick: () => { void testConnection() },
               }, tr('testConnection')),
               github !== null
-                ? h('span', { className: 'hs-meta' },
+                ? h('span', { className: 'as-meta' },
                     `${github.fullName} · ${github.private ? tr('repoPrivate') : tr('repoPublic')} · ${github.canPush ? tr('repoWritable') : tr('repoReadOnly')}`)
-                : (status.repoUrl !== '' ? h('span', { className: 'hs-meta' }, `${status.repoUrl} · ${status.branch}`) : null))),
+                : (status.repoUrl !== '' ? h('span', { className: 'as-meta' }, `${status.repoUrl} · ${status.branch}`) : null))),
 
           h(Card, { title: tr('itemsCard'), hint: tr('itemsCardHint') },
             items.map((item, index) => {
               const meta = itemMeta[item.id] ?? [item.id, undefined]
-              return h('div', { key: item.id, className: 'hs-item-block' },
+              return h('div', { key: item.id, className: 'as-item-block' },
                 h(Row, {
                   last: index === items.length - 1 && openItem !== item.id,
-                  title: h('span', { className: 'hs-row-heading' },
+                  title: h('span', { className: 'as-row-heading' },
                     h('span', null, tr(meta[0])),
-                    h('span', { className: 'hs-count' },
+                    h('span', { className: 'as-count' },
                       `${item.count} ${tr('filesCount')} · ${formatBytes(item.bytes)}`)),
                   hint: tr(meta[1] ?? ''),
-                  extra: h('div', { className: 'hs-item-actions' },
+                  extra: h('div', { className: 'as-item-actions' },
                     item.secretRisk === true
-                      ? h('span', { className: 'hs-tag hs-tag-warn' }, tr('secretWarning'))
+                      ? h('span', { className: 'as-tag as-tag-warn' }, tr('secretWarning'))
                       : null,
                     h('button', {
                       type: 'button',
-                      className: 'hs-link hs-link-button',
+                      className: 'as-link as-link-button',
                       onClick: () => { void toggleFileList(item) },
                     }, openItem === item.id ? tr('hideFiles') : tr('viewFiles'))),
                   side: h(Toggle, {
@@ -966,17 +966,17 @@ window.__ModuleLoader__.load({
                   }),
                 }),
                 openItem === item.id
-                  ? h('div', { className: 'hs-files' },
+                  ? h('div', { className: 'as-files' },
                       fileList === null
-                        ? h('p', { className: 'hs-empty' }, tr('loading'))
+                        ? h('p', { className: 'as-empty' }, tr('loading'))
                         : fileList.files.length === 0
-                          ? h('p', { className: 'hs-empty' }, tr('noFiles'))
-                          : h('ul', { className: 'hs-file-list' },
-                              fileList.files.map(file => h('li', { key: file.path, className: 'hs-file' },
-                                h('code', { className: 'hs-file-path' }, shortPath(file.path)),
-                                h('span', { className: 'hs-file-size' }, formatBytes(file.size))))),
+                          ? h('p', { className: 'as-empty' }, tr('noFiles'))
+                          : h('ul', { className: 'as-file-list' },
+                              fileList.files.map(file => h('li', { key: file.path, className: 'as-file' },
+                                h('code', { className: 'as-file-path' }, shortPath(file.path)),
+                                h('span', { className: 'as-file-size' }, formatBytes(file.size))))),
                       fileList !== null && fileList.truncated === true
-                        ? h('p', { className: 'hs-empty' }, tr('truncated'))
+                        ? h('p', { className: 'as-empty' }, tr('truncated'))
                         : null)
                   : null)
             })),
@@ -985,9 +985,9 @@ window.__ModuleLoader__.load({
             h(Row, {
               title: tr('autoSync'),
               hint: tr('autoSyncHint'),
-              side: h('div', { className: 'hs-inline' },
+              side: h('div', { className: 'as-inline' },
                 h('select', {
-                  className: 'hs-select',
+                  className: 'as-select',
                   value: String(status.intervalMinutes ?? 15),
                   disabled: busy !== null || status.autoSync !== true,
                   onChange: (event) => { void commitSettings({ intervalMinutes: Number(event.target.value) }) },
@@ -1024,7 +1024,7 @@ window.__ModuleLoader__.load({
               title: tr('conflictMode'),
               hint: tr('conflictHint'),
               side: h('select', {
-                className: 'hs-select',
+                className: 'as-select',
                 value: status.conflictMode ?? 'remote',
                 disabled: busy !== null,
                 onChange: (event) => { void commitSettings({ conflictMode: event.target.value }) },
@@ -1039,210 +1039,210 @@ window.__ModuleLoader__.load({
               ? h(Empty, null, tr('neverSynced'))
               : h('div', null,
                   lastError !== null
-                    ? h('div', { className: 'hs-banner hs-error', role: 'alert' }, errorText(lastError))
-                    : h('div', { className: 'hs-stats' },
-                        h('span', { className: 'hs-stat' }, h('b', null, String(lastResult.pulledTotal ?? lastResult.pulled?.length ?? 0)), ` ${tr('pulled')}`),
-                        h('span', { className: 'hs-stat' }, h('b', null, String(lastResult.pushedTotal ?? lastResult.pushed?.length ?? 0)), ` ${tr('pushed')}`),
-                        h('span', { className: 'hs-stat' }, h('b', null, String(lastResult.conflicts?.length ?? 0)), ` ${tr('conflicts')}`),
-                        h('span', { className: 'hs-stat' }, h('b', null, `${Math.max(0, Math.round((lastResult.durationMs ?? 0) / 100) / 10)}s`), ` ${tr('durationSec')}`),
+                    ? h('div', { className: 'as-banner as-error', role: 'alert' }, errorText(lastError))
+                    : h('div', { className: 'as-stats' },
+                        h('span', { className: 'as-stat' }, h('b', null, String(lastResult.pulledTotal ?? lastResult.pulled?.length ?? 0)), ` ${tr('pulled')}`),
+                        h('span', { className: 'as-stat' }, h('b', null, String(lastResult.pushedTotal ?? lastResult.pushed?.length ?? 0)), ` ${tr('pushed')}`),
+                        h('span', { className: 'as-stat' }, h('b', null, String(lastResult.conflicts?.length ?? 0)), ` ${tr('conflicts')}`),
+                        h('span', { className: 'as-stat' }, h('b', null, `${Math.max(0, Math.round((lastResult.durationMs ?? 0) / 100) / 10)}s`), ` ${tr('durationSec')}`),
                         typeof lastResult.commit === 'string'
-                          ? h('span', { className: 'hs-stat hs-mono' }, `${tr('commit')} ${lastResult.commit.slice(0, 8)}`)
+                          ? h('span', { className: 'as-stat as-mono' }, `${tr('commit')} ${lastResult.commit.slice(0, 8)}`)
                           : null,
                         typeof lastResult.backup === 'string'
-                          ? h('span', { className: 'hs-stat' }, `${tr('backup')} ${lastResult.backup}`)
+                          ? h('span', { className: 'as-stat' }, `${tr('backup')} ${lastResult.backup}`)
                           : null),
-                  h('div', { className: 'hs-timestamps' },
+                  h('div', { className: 'as-timestamps' },
                     h('span', null, absoluteTime(lastResult.at, language)),
                     relativeTime(lastResult.at, language) === null ? null : h('span', null, `· ${relativeTime(lastResult.at, language)}`),
                     lastResult.pulled?.length > 0
-                      ? h('details', { className: 'hs-details' },
+                      ? h('details', { className: 'as-details' },
                           h('summary', null, tr('pulled')),
-                          h('ul', { className: 'hs-file-list' },
-                            lastResult.pulled.slice(0, 50).map(entry => h('li', { key: `p-${entry.path}`, className: 'hs-file' },
-                              h('code', { className: 'hs-file-path' }, shortPath(entry.path)),
-                              h('span', { className: 'hs-file-size' }, entry.action === 'delete' ? '−' : formatBytes(entry.size))))))
+                          h('ul', { className: 'as-file-list' },
+                            lastResult.pulled.slice(0, 50).map(entry => h('li', { key: `p-${entry.path}`, className: 'as-file' },
+                              h('code', { className: 'as-file-path' }, shortPath(entry.path)),
+                              h('span', { className: 'as-file-size' }, entry.action === 'delete' ? '−' : formatBytes(entry.size))))))
                       : null,
                     lastResult.pushed?.length > 0
-                      ? h('details', { className: 'hs-details' },
+                      ? h('details', { className: 'as-details' },
                           h('summary', null, tr('pushed')),
-                          h('ul', { className: 'hs-file-list' },
-                            lastResult.pushed.slice(0, 50).map(entry => h('li', { key: `u-${entry.path}`, className: 'hs-file' },
-                              h('code', { className: 'hs-file-path' }, shortPath(entry.path)),
-                              h('span', { className: 'hs-file-size' }, entry.action === 'delete' ? '−' : formatBytes(entry.size))))))
+                          h('ul', { className: 'as-file-list' },
+                            lastResult.pushed.slice(0, 50).map(entry => h('li', { key: `u-${entry.path}`, className: 'as-file' },
+                              h('code', { className: 'as-file-path' }, shortPath(entry.path)),
+                              h('span', { className: 'as-file-size' }, entry.action === 'delete' ? '−' : formatBytes(entry.size))))))
                       : null)),
             Array.isArray(lastResult.localPluginsRegistered) && lastResult.localPluginsRegistered.length > 0
-              ? h('div', { className: 'hs-banner hs-ok' },
-                  h('div', { className: 'hs-banner-text' },
+              ? h('div', { className: 'as-banner as-ok' },
+                  h('div', { className: 'as-banner-text' },
                     h('b', null, tr('localPluginsRegistered')),
-                    h('div', { className: 'hs-banner-sub' }, lastResult.localPluginsRegistered.join(', ')),
-                    h('div', { className: 'hs-banner-sub' }, tr('localPluginsRestart'))))
+                    h('div', { className: 'as-banner-sub' }, lastResult.localPluginsRegistered.join(', ')),
+                    h('div', { className: 'as-banner-sub' }, tr('localPluginsRestart'))))
               : null,
             status.pendingInstall === true
-              ? h('div', { className: 'hs-banner hs-warn' },
-                  h('div', { className: 'hs-banner-text' },
+              ? h('div', { className: 'as-banner as-warn' },
+                  h('div', { className: 'as-banner-text' },
                     h('b', null, tr('installPendingTitle')),
-                    h('div', { className: 'hs-banner-sub' }, tr('installPendingHint'))),
+                    h('div', { className: 'as-banner-sub' }, tr('installPendingHint'))),
                   h('button', {
                     type: 'button',
-                    className: 'hs-btn hs-primary',
+                    className: 'as-btn as-primary',
                     disabled: busy !== null || running,
                     onClick: () => { void installDependencies() },
                   }, busy === 'install' || phase === 'installing' ? tr('installing') : tr('installNow')))
               : null,
             lastResult?.install !== undefined && lastResult.install !== null
-              ? h('div', { className: `hs-banner ${lastResult.install.ok === true ? 'hs-ok' : 'hs-error'}` },
-                  h('div', { className: 'hs-banner-text' },
+              ? h('div', { className: `as-banner ${lastResult.install.ok === true ? 'as-ok' : 'as-error'}` },
+                  h('div', { className: 'as-banner-text' },
                     h('b', null, lastResult.install.ok === true ? tr('installOk') : tr('installFailed')),
                     lastResult.install.ok === true
-                      ? h('div', { className: 'hs-banner-sub' }, tr('restartHint'))
+                      ? h('div', { className: 'as-banner-sub' }, tr('restartHint'))
                       : null,
                     lastResult.install.output
-                      ? h('details', { className: 'hs-details' },
+                      ? h('details', { className: 'as-details' },
                           h('summary', null, tr('installOutput')),
-                          h('pre', { className: 'hs-pre' }, String(lastResult.install.output).slice(-2000)))
+                          h('pre', { className: 'as-pre' }, String(lastResult.install.output).slice(-2000)))
                       : null))
               : null,
             conflicts.length > 0
-              ? h('div', { className: 'hs-conflicts' },
-                  h('h4', { className: 'hs-conflict-title' }, tr('conflictTitle')),
-                  h('p', { className: 'hs-hint' }, tr('conflictHint')),
-                  conflicts.map(conflict => h('div', { key: conflict.path, className: 'hs-conflict' },
-                    h('code', { className: 'hs-file-path' }, conflict.path),
-                    h('div', { className: 'hs-conflict-actions' },
+              ? h('div', { className: 'as-conflicts' },
+                  h('h4', { className: 'as-conflict-title' }, tr('conflictTitle')),
+                  h('p', { className: 'as-hint' }, tr('conflictHint')),
+                  conflicts.map(conflict => h('div', { key: conflict.path, className: 'as-conflict' },
+                    h('code', { className: 'as-file-path' }, conflict.path),
+                    h('div', { className: 'as-conflict-actions' },
                       h('button', {
                         type: 'button',
-                        className: 'hs-btn hs-btn-sm',
+                        className: 'as-btn as-btn-sm',
                         disabled: busy !== null || running,
                         onClick: () => { void resolveConflict(conflict.path, 'local') },
                       }, tr('keepLocal')),
                       h('button', {
                         type: 'button',
-                        className: 'hs-btn hs-btn-sm',
+                        className: 'as-btn as-btn-sm',
                         disabled: busy !== null || running,
                         onClick: () => { void resolveConflict(conflict.path, 'remote') },
                       }, tr('keepRemote'))))))
               : null),
 
           status.warnings !== undefined && status.warnings.length > 0
-            ? h('details', { className: 'hs-warnings' },
+            ? h('details', { className: 'as-warnings' },
                 h('summary', null, `${tr('warnings')} (${status.warningTotal ?? status.warnings.length})`),
-                h('ul', { className: 'hs-file-list' },
-                  status.warnings.map((warning, index) => h('li', { key: `w-${index}`, className: 'hs-file', title: warning.message ?? '' },
-                    h('code', { className: 'hs-file-path' }, shortPath(warning.repoPath || '—')),
-                    h('span', { className: 'hs-file-size' }, tr(WARNING_KEYS[warning.reason] ?? 'warnOther'))))))
+                h('ul', { className: 'as-file-list' },
+                  status.warnings.map((warning, index) => h('li', { key: `w-${index}`, className: 'as-file', title: warning.message ?? '' },
+                    h('code', { className: 'as-file-path' }, shortPath(warning.repoPath || '—')),
+                    h('span', { className: 'as-file-size' }, tr(WARNING_KEYS[warning.reason] ?? 'warnOther'))))))
             : null,
 
-          h('footer', { className: 'hs-footer' },
+          h('footer', { className: 'as-footer' },
             h('span', null, `${tr('profileLabel')}: ${status.profile}`),
             h('span', null, `${tr('instanceLabel')}: ${status.instanceId}`),
-            h('span', { className: 'hs-mono' }, `${tr('repoPathLabel')}: ${status.dshHome}/harness-sync/repo`),
-            h('span', { className: 'hs-mono' }, `${tr('skillsLabel')}: ${status.skillsRoot}`))))
+            h('span', { className: 'as-mono' }, `${tr('repoPathLabel')}: ${status.dshHome}/anywhere-sync/repo`),
+            h('span', { className: 'as-mono' }, `${tr('skillsLabel')}: ${status.skillsRoot}`))))
     }
 
     // --------------------------------------------------------------- styles
 
     const CSS = `
-.hs-root{height:100%;min-height:0;display:flex;flex-direction:column;color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;line-height:20px}
-.hs-root *{box-sizing:border-box}
-.hs-head{display:flex;flex-direction:column;gap:6px;padding:0 4px 10px;border-bottom:1px solid var(--dsw-alias-border-l1,#e6e8eb);margin-bottom:10px}
-.hs-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
-.hs-title{margin:0;font-size:15px;line-height:22px;font-weight:600;color:var(--dsw-alias-label-primary,#1f2328)}
-.hs-sub{margin:0;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570);max-width:760px}
-.hs-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
-.hs-actions-tight{margin-top:10px}
-.hs-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:2px 4px 48px;display:flex;flex-direction:column;gap:12px}
-.hs-pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;background:var(--dsw-alias-bg-layer-2,#f3f4f6);border:1px solid var(--dsw-alias-border-l1,#e6e8eb);font-size:11px;line-height:16px;color:var(--dsw-alias-label-secondary,#5c6570);white-space:nowrap}
-.hs-dot{width:7px;height:7px;border-radius:50%;background:var(--dsw-alias-state-idle-primary,#9aa1ab);flex:none}
-.hs-pill.hs-ok .hs-dot{background:var(--dsw-alias-state-success-primary,#18a058)}
-.hs-pill.hs-warn .hs-dot{background:var(--dsw-alias-state-warn-primary,#d98f00)}
-.hs-pill.hs-error .hs-dot{background:var(--dsw-alias-state-error-primary,#d03050)}
-.hs-pill.hs-busy .hs-dot{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff));animation:hs-pulse 1.2s ease-in-out infinite}
-@media (prefers-reduced-motion: reduce){.hs-pill.hs-busy .hs-dot{animation:none}}
-@keyframes hs-pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.hs-card{border:1px solid var(--dsw-alias-border-l1,#e6e8eb);background:var(--dsw-alias-bg-layer-1,#fff);border-radius:10px;padding:14px 14px 6px;min-width:0}
-.hs-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
-.hs-card-title{margin:0;font-size:13px;line-height:20px;font-weight:600;color:var(--dsw-alias-label-primary,#1f2328)}
-.hs-card-hint{margin:2px 0 0;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570);max-width:640px}
-.hs-card-aside{flex:none}
-.hs-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--dsw-alias-border-l1,#e6e8eb)}
-.hs-row.hs-last{border-bottom:none}
-.hs-row-main{min-width:0;flex:1}
-.hs-row-title{font-size:13px;line-height:20px;color:var(--dsw-alias-label-primary,#1f2328)}
-.hs-row-heading{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
-.hs-row-hint{margin-top:2px;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570)}
-.hs-row-side{flex:none;display:flex;align-items:center;gap:8px;padding-top:1px}
-.hs-count{font-size:11px;line-height:16px;color:var(--dsw-alias-label-secondary,#5c6570);background:var(--dsw-alias-bg-layer-2,#f3f4f6);border-radius:999px;padding:0 7px;white-space:nowrap}
-.hs-item-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
-.hs-tag{font-size:11px;line-height:16px;border-radius:4px;padding:0 5px;white-space:nowrap}
-.hs-tag-warn{color:var(--dsw-alias-state-warn-primary,#d98f00);border:1px solid var(--dsw-alias-state-warn-primary,#d98f00)}
-.hs-item-block{min-width:0}
-.hs-files{border:1px dashed var(--dsw-alias-border-l1,#e6e8eb);border-radius:8px;padding:8px 10px;margin:0 0 11px;background:var(--dsw-alias-bg-layer-2,#fafafa);max-height:260px;overflow:auto}
-.hs-file-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
-.hs-file{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:11px;line-height:17px}
-.hs-file-path{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--dsw-alias-label-secondary,#5c6570);overflow-wrap:anywhere;min-width:0}
-.hs-file-size{flex:none;color:var(--dsw-alias-label-secondary,#5c6570);font-size:11px}
-.hs-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:10px}
-@media (max-width:640px){.hs-grid{grid-template-columns:minmax(0,1fr)}}
-.hs-field{display:flex;flex-direction:column;gap:4px;min-width:0}
-.hs-label{font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570)}
-.hs-input{width:100%;height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;outline:none}
-.hs-input:focus{border-color:var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));box-shadow:0 0 0 2px color-mix(in srgb, var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff)) 22%, transparent)}
-.hs-input::placeholder{color:var(--dsw-alias-label-secondary,#5c6570);opacity:.7}
-.hs-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-.hs-token-row{display:flex;align-items:center;gap:8px}
-.hs-token-side{display:flex;align-items:flex-end;justify-content:flex-end;gap:12px;flex-wrap:wrap}
-.hs-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;line-height:18px;cursor:pointer;white-space:nowrap}
-.hs-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2,#f3f4f6);border-color:var(--dsw-alias-border-l2,#c9ced6)}
-.hs-btn:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));outline-offset:2px}
-.hs-btn:disabled{opacity:.45;cursor:default}
-.hs-btn-sm{height:26px;padding:0 9px;font-size:11px;border-radius:6px}
-.hs-primary{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff));border-color:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff));color:var(--dsw-alias-label-primary-foreground,#fff)}
-.hs-primary:hover:not(:disabled){background:var(--dsw-alias-button-primary-hover,var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff)));border-color:var(--dsw-alias-button-primary-hover,var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff)));color:var(--dsw-alias-label-primary-foreground,#fff);filter:none}
-.hs-link{color:var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));font-size:12px;line-height:18px;text-decoration:none;background:none;border:none;padding:0;cursor:pointer;font-family:inherit}
-.hs-link:hover{text-decoration:underline}
-.hs-link-button{display:inline-flex;align-items:center}
-.hs-link-button:disabled{opacity:.45;cursor:default;text-decoration:none}
-.hs-hint{font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570)}
-.hs-hint-wide{margin:0 0 6px;max-width:720px}
-.hs-meta{font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);overflow-wrap:anywhere}
-.hs-switch{position:relative;width:34px;height:20px;border-radius:999px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-2,#e9ecf1);padding:0;cursor:pointer;flex:none;transition:background-color 120ms ease,border-color 120ms ease}
-.hs-switch .hs-knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform 120ms ease}
-.hs-switch.hs-on{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff));border-color:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff))}
-.hs-switch.hs-on .hs-knob{background:var(--dsw-alias-label-primary-foreground,#fff);transform:translateX(14px)}
-.hs-switch:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));outline-offset:2px}
-.hs-switch:disabled{opacity:.45;cursor:default}
-.hs-select{height:30px;padding:0 8px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;max-width:220px}
-.hs-select:disabled{opacity:.45}
-.hs-inline{display:flex;align-items:center;gap:8px}
-.hs-banner{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;border-radius:8px;padding:9px 11px;font-size:12px;line-height:18px;border:1px solid var(--dsw-alias-border-l1,#e6e8eb);background:var(--dsw-alias-bg-layer-2,#f5f6f8);color:var(--dsw-alias-label-primary,#1f2328)}
-.hs-banner-text{min-width:0;flex:1}
-.hs-banner-sub{font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);margin-top:2px}
-.hs-banner-actions{display:flex;gap:6px;flex-wrap:wrap}
-.hs-error{border-color:var(--dsw-alias-state-error-primary,#d03050)}
-.hs-error .hs-banner-text,.hs-error{color:var(--dsw-alias-state-error-primary,#d03050)}
-.hs-warn{border-color:var(--dsw-alias-state-warn-primary,#d98f00)}
-.hs-ok{border-color:var(--dsw-alias-state-success-primary,#18a058)}
-.hs-info{border-style:dashed}
-.hs-stats{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 6px}
-.hs-stat{display:inline-flex;align-items:baseline;gap:4px;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570);background:var(--dsw-alias-bg-layer-2,#f5f6f8);border-radius:6px;padding:2px 8px}
-.hs-stat b{color:var(--dsw-alias-label-primary,#1f2328);font-weight:600}
-.hs-timestamps{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);margin-bottom:4px}
-.hs-details{display:inline-block}
-.hs-details summary{cursor:pointer;color:var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));font-size:11px;line-height:17px;list-style:none}
-.hs-details summary::-webkit-details-marker{display:none}
-.hs-details summary:hover{text-decoration:underline}
-.hs-details[open] summary{margin-bottom:4px}
-.hs-pre{max-height:220px;overflow:auto;background:var(--dsw-alias-bg-layer-2,#f5f6f8);border:1px solid var(--dsw-alias-border-l1,#e6e8eb);border-radius:6px;padding:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--dsw-alias-label-secondary,#5c6570);margin:4px 0 0}
-.hs-conflicts{border-top:1px solid var(--dsw-alias-border-l1,#e6e8eb);margin-top:10px;padding-top:10px}
-.hs-conflict-title{margin:0 0 2px;font-size:12px;line-height:18px;font-weight:600;color:var(--dsw-alias-state-warn-primary,#d98f00)}
-.hs-conflict{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--dsw-alias-border-l1,#e6e8eb)}
-.hs-conflict:last-child{border-bottom:none}
-.hs-conflict-actions{display:flex;gap:6px;flex:none}
-.hs-empty{margin:8px 0;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570)}
-.hs-warnings{border:1px solid var(--dsw-alias-border-l1,#e6e8eb);border-radius:8px;padding:8px 11px;background:var(--dsw-alias-bg-layer-2,#fafafa);font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570)}
-.hs-warnings summary{cursor:pointer;font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570)}
-.hs-warnings[open] summary{margin-bottom:4px}
-.hs-footer{display:flex;flex-wrap:wrap;gap:6px 14px;padding:2px 2px 8px;font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);overflow-wrap:anywhere}
+.as-root{height:100%;min-height:0;display:flex;flex-direction:column;color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;line-height:20px}
+.as-root *{box-sizing:border-box}
+.as-head{display:flex;flex-direction:column;gap:6px;padding:0 4px 10px;border-bottom:1px solid var(--dsw-alias-border-l1,#e6e8eb);margin-bottom:10px}
+.as-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.as-title{margin:0;font-size:15px;line-height:22px;font-weight:600;color:var(--dsw-alias-label-primary,#1f2328)}
+.as-sub{margin:0;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570);max-width:760px}
+.as-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
+.as-actions-tight{margin-top:10px}
+.as-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:2px 4px 48px;display:flex;flex-direction:column;gap:12px}
+.as-pill{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;background:var(--dsw-alias-bg-layer-2,#f3f4f6);border:1px solid var(--dsw-alias-border-l1,#e6e8eb);font-size:11px;line-height:16px;color:var(--dsw-alias-label-secondary,#5c6570);white-space:nowrap}
+.as-dot{width:7px;height:7px;border-radius:50%;background:var(--dsw-alias-state-idle-primary,#9aa1ab);flex:none}
+.as-pill.as-ok .as-dot{background:var(--dsw-alias-state-success-primary,#18a058)}
+.as-pill.as-warn .as-dot{background:var(--dsw-alias-state-warn-primary,#d98f00)}
+.as-pill.as-error .as-dot{background:var(--dsw-alias-state-error-primary,#d03050)}
+.as-pill.as-busy .as-dot{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff));animation:as-pulse 1.2s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.as-pill.as-busy .as-dot{animation:none}}
+@keyframes as-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.as-card{border:1px solid var(--dsw-alias-border-l1,#e6e8eb);background:var(--dsw-alias-bg-layer-1,#fff);border-radius:10px;padding:14px 14px 6px;min-width:0}
+.as-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.as-card-title{margin:0;font-size:13px;line-height:20px;font-weight:600;color:var(--dsw-alias-label-primary,#1f2328)}
+.as-card-hint{margin:2px 0 0;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570);max-width:640px}
+.as-card-aside{flex:none}
+.as-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--dsw-alias-border-l1,#e6e8eb)}
+.as-row.as-last{border-bottom:none}
+.as-row-main{min-width:0;flex:1}
+.as-row-title{font-size:13px;line-height:20px;color:var(--dsw-alias-label-primary,#1f2328)}
+.as-row-heading{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.as-row-hint{margin-top:2px;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570)}
+.as-row-side{flex:none;display:flex;align-items:center;gap:8px;padding-top:1px}
+.as-count{font-size:11px;line-height:16px;color:var(--dsw-alias-label-secondary,#5c6570);background:var(--dsw-alias-bg-layer-2,#f3f4f6);border-radius:999px;padding:0 7px;white-space:nowrap}
+.as-item-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
+.as-tag{font-size:11px;line-height:16px;border-radius:4px;padding:0 5px;white-space:nowrap}
+.as-tag-warn{color:var(--dsw-alias-state-warn-primary,#d98f00);border:1px solid var(--dsw-alias-state-warn-primary,#d98f00)}
+.as-item-block{min-width:0}
+.as-files{border:1px dashed var(--dsw-alias-border-l1,#e6e8eb);border-radius:8px;padding:8px 10px;margin:0 0 11px;background:var(--dsw-alias-bg-layer-2,#fafafa);max-height:260px;overflow:auto}
+.as-file-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.as-file{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:11px;line-height:17px}
+.as-file-path{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--dsw-alias-label-secondary,#5c6570);overflow-wrap:anywhere;min-width:0}
+.as-file-size{flex:none;color:var(--dsw-alias-label-secondary,#5c6570);font-size:11px}
+.as-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:10px}
+@media (max-width:640px){.as-grid{grid-template-columns:minmax(0,1fr)}}
+.as-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.as-label{font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570)}
+.as-input{width:100%;height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;outline:none}
+.as-input:focus{border-color:var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));box-shadow:0 0 0 2px color-mix(in srgb, var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff)) 22%, transparent)}
+.as-input::placeholder{color:var(--dsw-alias-label-secondary,#5c6570);opacity:.7}
+.as-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.as-token-row{display:flex;align-items:center;gap:8px}
+.as-token-side{display:flex;align-items:flex-end;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.as-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;line-height:18px;cursor:pointer;white-space:nowrap}
+.as-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2,#f3f4f6);border-color:var(--dsw-alias-border-l2,#c9ced6)}
+.as-btn:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));outline-offset:2px}
+.as-btn:disabled{opacity:.45;cursor:default}
+.as-btn-sm{height:26px;padding:0 9px;font-size:11px;border-radius:6px}
+.as-primary{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff));border-color:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff));color:var(--dsw-alias-label-primary-foreground,#fff)}
+.as-primary:hover:not(:disabled){background:var(--dsw-alias-button-primary-hover,var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff)));border-color:var(--dsw-alias-button-primary-hover,var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff)));color:var(--dsw-alias-label-primary-foreground,#fff);filter:none}
+.as-link{color:var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));font-size:12px;line-height:18px;text-decoration:none;background:none;border:none;padding:0;cursor:pointer;font-family:inherit}
+.as-link:hover{text-decoration:underline}
+.as-link-button{display:inline-flex;align-items:center}
+.as-link-button:disabled{opacity:.45;cursor:default;text-decoration:none}
+.as-hint{font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570)}
+.as-hint-wide{margin:0 0 6px;max-width:720px}
+.as-meta{font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);overflow-wrap:anywhere}
+.as-switch{position:relative;width:34px;height:20px;border-radius:999px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-2,#e9ecf1);padding:0;cursor:pointer;flex:none;transition:background-color 120ms ease,border-color 120ms ease}
+.as-switch .as-knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform 120ms ease}
+.as-switch.as-on{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff));border-color:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary,#4f7cff))}
+.as-switch.as-on .as-knob{background:var(--dsw-alias-label-primary-foreground,#fff);transform:translateX(14px)}
+.as-switch:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));outline-offset:2px}
+.as-switch:disabled{opacity:.45;cursor:default}
+.as-select{height:30px;padding:0 8px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#d5d9de);background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,#1f2328);font:inherit;font-size:12px;max-width:220px}
+.as-select:disabled{opacity:.45}
+.as-inline{display:flex;align-items:center;gap:8px}
+.as-banner{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;border-radius:8px;padding:9px 11px;font-size:12px;line-height:18px;border:1px solid var(--dsw-alias-border-l1,#e6e8eb);background:var(--dsw-alias-bg-layer-2,#f5f6f8);color:var(--dsw-alias-label-primary,#1f2328)}
+.as-banner-text{min-width:0;flex:1}
+.as-banner-sub{font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);margin-top:2px}
+.as-banner-actions{display:flex;gap:6px;flex-wrap:wrap}
+.as-error{border-color:var(--dsw-alias-state-error-primary,#d03050)}
+.as-error .as-banner-text,.as-error{color:var(--dsw-alias-state-error-primary,#d03050)}
+.as-warn{border-color:var(--dsw-alias-state-warn-primary,#d98f00)}
+.as-ok{border-color:var(--dsw-alias-state-success-primary,#18a058)}
+.as-info{border-style:dashed}
+.as-stats{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 6px}
+.as-stat{display:inline-flex;align-items:baseline;gap:4px;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570);background:var(--dsw-alias-bg-layer-2,#f5f6f8);border-radius:6px;padding:2px 8px}
+.as-stat b{color:var(--dsw-alias-label-primary,#1f2328);font-weight:600}
+.as-timestamps{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);margin-bottom:4px}
+.as-details{display:inline-block}
+.as-details summary{cursor:pointer;color:var(--dsw-alias-state-business-primary,var(--dsw-alias-brand-primary,#4f7cff));font-size:11px;line-height:17px;list-style:none}
+.as-details summary::-webkit-details-marker{display:none}
+.as-details summary:hover{text-decoration:underline}
+.as-details[open] summary{margin-bottom:4px}
+.as-pre{max-height:220px;overflow:auto;background:var(--dsw-alias-bg-layer-2,#f5f6f8);border:1px solid var(--dsw-alias-border-l1,#e6e8eb);border-radius:6px;padding:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--dsw-alias-label-secondary,#5c6570);margin:4px 0 0}
+.as-conflicts{border-top:1px solid var(--dsw-alias-border-l1,#e6e8eb);margin-top:10px;padding-top:10px}
+.as-conflict-title{margin:0 0 2px;font-size:12px;line-height:18px;font-weight:600;color:var(--dsw-alias-state-warn-primary,#d98f00)}
+.as-conflict{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--dsw-alias-border-l1,#e6e8eb)}
+.as-conflict:last-child{border-bottom:none}
+.as-conflict-actions{display:flex;gap:6px;flex:none}
+.as-empty{margin:8px 0;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,#5c6570)}
+.as-warnings{border:1px solid var(--dsw-alias-border-l1,#e6e8eb);border-radius:8px;padding:8px 11px;background:var(--dsw-alias-bg-layer-2,#fafafa);font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570)}
+.as-warnings summary{cursor:pointer;font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570)}
+.as-warnings[open] summary{margin-bottom:4px}
+.as-footer{display:flex;flex-wrap:wrap;gap:6px 14px;padding:2px 2px 8px;font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);overflow-wrap:anywhere}
 `
 
     // ---------------------------------------------------------------- setup
@@ -1250,18 +1250,18 @@ window.__ModuleLoader__.load({
     return {
       inject: ['slots', 'locale'],
       apply(ctx) {
-        ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'harness-sync: dictionaries')
+        ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'anywhere-sync: dictionaries')
         const t = ctx.locale.bind(NS)
         ctx.effect(() => ctx.slots.inject('settings.section', () => ctx.slots.register({
           name: 'settings.section',
-          id: 'harness-sync',
+          id: 'anywhere-sync',
           order: 45,
           label: () => t('nav'),
           locale: NS,
         }, (ownerProps) => h(Section, {
           close: ownerProps?.close,
           locale: ctx.locale,
-        }))), 'harness-sync: settings section')
+        }))), 'anywhere-sync: settings section')
       },
     }
   },

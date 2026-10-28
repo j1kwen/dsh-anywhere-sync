@@ -1,8 +1,8 @@
 /**
- * dsh-harness-sync — Host half.
+ * dsh-anywhere-sync — Host half.
  *
- * Owns the sync engine, the `/harness-sync/api` routes the settings page talks
- * to, the `harness_sync` agent tool, and the optional auto-sync timer. The
+ * Owns the sync engine, the `/anywhere-sync/api` routes the settings page talks
+ * to, the `anywhere_sync` agent tool, and the optional auto-sync timer. The
  * Client half only renders; every operation lives here so the page and the
  * agent cannot diverge.
  */
@@ -43,21 +43,21 @@ export function apply(ctx) {
     timer = setInterval(() => {
       if (engine.running !== null) return
       void engine.sync('both').then((result) => {
-        if (result.error !== null) logger(`[harness-sync] auto sync: ${result.error.code}: ${result.error.message}`)
-      }).catch((error) => logger(`[harness-sync] auto sync crashed: ${String(error?.message ?? error)}`))
+        if (result.error !== null) logger(`[anywhere-sync] auto sync: ${result.error.code}: ${result.error.message}`)
+      }).catch((error) => logger(`[anywhere-sync] auto sync crashed: ${String(error?.message ?? error)}`))
     }, interval)
     timer.unref?.()
   }
 
   ctx.effect(() => {
-    logger(`[harness-sync] profile=${runtime.profileName} dir=${runtime.profileDir}`)
+    logger(`[anywhere-sync] profile=${runtime.profileName} dir=${runtime.profileDir}`)
     scheduleAutoSync()
     if (engine.config.syncOnStartup && engine.config.repoUrl !== '') {
       startupTimer = setTimeout(() => {
         if (engine.running !== null) return
         void engine.sync('both').then((result) => {
-          if (result.error !== null) logger(`[harness-sync] startup sync: ${result.error.code}: ${result.error.message}`)
-        }).catch((error) => logger(`[harness-sync] startup sync crashed: ${String(error?.message ?? error)}`))
+          if (result.error !== null) logger(`[anywhere-sync] startup sync: ${result.error.code}: ${result.error.message}`)
+        }).catch((error) => logger(`[anywhere-sync] startup sync crashed: ${String(error?.message ?? error)}`))
       }, STARTUP_DELAY_MS)
       startupTimer.unref?.()
     }
@@ -68,16 +68,16 @@ export function apply(ctx) {
       startupTimer = null
       engine.dispose()
     }
-  }, 'harness-sync: lifetime')
+  }, 'anywhere-sync: lifetime')
 
   // The settings page needs the web server. A headless profile still gets the
   // tool and the timer, so the plugin degrades instead of throwing.
   ctx.inject(['webServer'], (webCtx) => {
     webCtx.effect(() => webCtx.webServer.register({
       kind: 'prefix',
-      path: '/harness-sync/api',
+      path: '/anywhere-sync/api',
       handler: createRouteHandler({ engine, getContext: () => webCtx, logger }),
-    }), 'harness-sync: routes')
+    }), 'anywhere-sync: routes')
   })
 
   ctx.inject(['tools'], (toolCtx) => {
@@ -87,10 +87,10 @@ export function apply(ctx) {
       } catch (error) {
         // A name collision or an older tool registry must not take the
         // settings page down with it.
-        console.warn(`[harness-sync] agent tool unavailable: ${String(error?.message ?? error)}`)
+        console.warn(`[anywhere-sync] agent tool unavailable: ${String(error?.message ?? error)}`)
         return () => {}
       }
-    }, 'harness-sync: tool')
+    }, 'anywhere-sync: tool')
   })
 }
 
