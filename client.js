@@ -501,12 +501,52 @@ window.__ModuleLoader__.load({
       return h('p', { className: 'as-empty' }, props.children)
     }
 
+    /**
+     * Locale snapshot that works on both React 17 and 18.
+     *
+     * The Harness client normally provides `getSnapshot` + `subscribe` (React
+     * 18's useSyncExternalStore), but a different Harness generation may expose
+     * only `getLocale`. A missing hook or method must never crash the whole
+     * settings section into a blank page.
+     */
+    function useLocaleSnapshot(locale) {
+      const read = React.useCallback(() => {
+        try {
+          if (locale !== null && typeof locale === 'object') {
+            if (typeof locale.getSnapshot === 'function') return locale.getSnapshot()
+            if (typeof locale.getLocale === 'function') return locale.getLocale()
+          }
+        } catch (error) {
+          try {
+            console.warn('[anywhere-sync] locale snapshot failed', error)
+          } catch {
+            // Console may be unavailable.
+          }
+        }
+        return { active: 'en' }
+      }, [locale])
+      const [snapshot, setSnapshot] = React.useState(read)
+      React.useEffect(() => {
+        if (locale === null || typeof locale !== 'object' || typeof locale.subscribe !== 'function') return undefined
+        let unsubscribe
+        try {
+          unsubscribe = locale.subscribe(() => setSnapshot(read()))
+        } catch (error) {
+          try {
+            console.warn('[anywhere-sync] locale subscribe failed', error)
+          } catch {
+            // Console may be unavailable.
+          }
+          return undefined
+        }
+        return typeof unsubscribe === 'function' ? unsubscribe : undefined
+      }, [locale, read])
+      return snapshot
+    }
+
     function Section(props) {
       const locale = props.locale
-      const localeSnap = React.useSyncExternalStore(
-        (callback) => locale.subscribe(callback),
-        () => locale.getSnapshot(),
-      )
+      const localeSnap = useLocaleSnapshot(locale)
       const language = String(localeSnap?.active ?? '').toLowerCase().startsWith('zh') ? 'zh' : 'en'
       const tr = React.useCallback((key) => DICTS[language][key] ?? DICTS.en[key] ?? key, [language])
       const errorText = React.useCallback((failure) => {
@@ -1245,11 +1285,55 @@ window.__ModuleLoader__.load({
 .as-footer{display:flex;flex-wrap:wrap;gap:6px 14px;padding:2px 2px 8px;font-size:11px;line-height:17px;color:var(--dsw-alias-label-secondary,#5c6570);overflow-wrap:anywhere}
 `
 
+    /**
+     * Keep a rendering failure inside the settings page instead of leaving the
+     * section blank. The fallback is intentionally plain and bilingual so the
+     * user can report the exact error even when the normal UI cannot render.
+     */
+    class SectionBoundary extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = { error: null }
+      }
+
+      static getDerivedStateFromError(error) {
+        return { error }
+      }
+
+      componentDidCatch(error, info) {
+        try {
+          console.error('[anywhere-sync] settings section crashed', error, info)
+        } catch {
+          // Console may be unavailable.
+        }
+      }
+
+      render() {
+        if (this.state.error === null) return this.props.children
+        const message = String(this.state.error?.message ?? this.state.error)
+        const stack = String(this.state.error?.stack ?? '')
+        return h('section', { className: 'as-root' },
+          h('style', null, CSS),
+          h('div', { className: 'as-body' },
+            h('div', { className: 'as-banner as-error', role: 'alert' },
+              h('div', { className: 'as-banner-text' },
+                h('b', null, 'Anywhere Sync 设置页渲染失败 / failed to render'),
+                h('div', { className: 'as-banner-sub' }, message))),
+            h('pre', { className: 'as-pre' }, stack),
+            h('p', { className: 'as-empty' }, '请把上面的错误和浏览器控制台内容发给插件维护者。 / Send this error and the browser console to the maintainer.')))
+      }
+    }
+
     // ---------------------------------------------------------------- setup
 
     return {
       inject: ['slots', 'locale'],
       apply(ctx) {
+        try {
+          console.info('[anywhere-sync] settings client 1.2.2 loaded')
+        } catch {
+          // Console may be unavailable.
+        }
         ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'anywhere-sync: dictionaries')
         const t = ctx.locale.bind(NS)
         ctx.effect(() => ctx.slots.inject('settings.section', () => ctx.slots.register({
@@ -1258,10 +1342,10 @@ window.__ModuleLoader__.load({
           order: 45,
           label: () => t('nav'),
           locale: NS,
-        }, (ownerProps) => h(Section, {
+        }, (ownerProps) => h(SectionBoundary, null, h(Section, {
           close: ownerProps?.close,
           locale: ctx.locale,
-        }))), 'anywhere-sync: settings section')
+        })))), 'anywhere-sync: settings section')
       },
     }
   },

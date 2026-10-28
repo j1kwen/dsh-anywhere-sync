@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.2
+
+- Make the settings client compatible with Harness generations that expose
+  React 17 or a locale service without `getSnapshot`: a guarded
+  `subscribe`/`getSnapshot` hook (falling back to `getLocale`) replaces
+  `useSyncExternalStore`.
+- Add an error boundary around the settings page. A rendering failure now shows
+  the error message and stack on the page instead of leaving it blank.
+- Log the loaded client version (`[anywhere-sync] settings client … loaded`).
+
 ## 1.2.1
 
 - Restore the settings navigation and page label to **配置同步** (zh) /
