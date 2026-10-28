@@ -146,8 +146,9 @@ plugin is mounted in; the settings page shows its name.
 - DeepSeek Harness with the Web UI and the plugin manager (the `settings.section`
   and `webServer` services are used).
 - Node.js 20+ in the Harness runtime; `git` on `PATH`.
-- macOS, Linux and Windows. CI covers Linux on Node 20 and 22; the engine and
-  HTTP tests run without Harness and without network.
+- Designed for macOS, Linux and Windows. CI runs the offline engine and HTTP
+  tests on Linux with Node 20 and 22; Windows path handling uses Node's `path`
+  APIs but is not exercised by CI.
 
 ## Development
 

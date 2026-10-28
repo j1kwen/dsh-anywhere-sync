@@ -83,6 +83,7 @@ dsh plugin --profile desktop add /path/to/dsh-harness-sync
 - HTTP 接口挂在 `/harness-sync/api`，复用 Harness Connection 的 Host/Origin 与登录校验；没有该服务时只接受 loopback。修改类请求还要求同源 `Origin`。
 - 插件不读取、不同步 `~/.dsh/.credentials.yaml`、会话记录或工作区文件。
 - 需要本机安装 `git`；依赖安装优先使用启动器发布的包管理器，否则使用 PATH 上的 `pnpm`。
+- 面向 macOS / Linux / Windows；CI 在 Linux + Node 20/22 上运行离线引擎与 HTTP 测试，Windows 路径处理使用 Node 的 `path` API，但未经 CI 覆盖。
 - 没有遥测、统计或除配置的 Git 远端之外的外发请求。
 
 ## 工作方式
