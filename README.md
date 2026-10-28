@@ -148,7 +148,7 @@ If **Settings → Config Sync** is blank after installing the plugin:
 1. Restart Harness. Installed client bundles are cached at boot; installing a
    plugin from a Git URL while Harness is running can leave the browser half
    unloaded.
-2. Update to 1.2.2 or later. A client-side rendering error is now displayed on
+2. Update to 1.2.3 or later. A client-side rendering error is now displayed on
    the page (with a stack) instead of a blank section; the browser console also
    logs the loaded client version.
 3. If the page still shows an error, include that message, the browser console

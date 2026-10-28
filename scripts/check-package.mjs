@@ -31,6 +31,8 @@ for (const [field, target] of Object.entries({ '.': pkg.exports['.'], './client'
   assert.ok(existsSync(join(root, target)), `exports["${field}"] points at a missing file: ${target}`)
 }
 assert.match(read('icon.svg').trimStart(), /^<svg[\s>]/, 'icon.svg is not an SVG document')
+// First run has no lastResult; the settings page must not dereference it.
+assert.match(read('client.js'), /Array\.isArray\(lastResult\?\.localPluginsRegistered\)/, 'settings client must tolerate a null lastResult')
 assert.ok(existsSync(join(root, 'assets/icon-180.png')), 'assets/icon-180.png is missing')
 
 for (const locale of ['en', 'zh']) {

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.3
+
+- Fix the first-run settings page crash
+  (`Cannot read properties of null (reading 'localPluginsRegistered')`):
+  `status.lastResult` is `null` before the first sync, and the
+  local-plugin-registration banner dereferenced it without a guard. It now uses
+  `lastResult?.localPluginsRegistered`, so a fresh machine renders the setup
+  page instead of the error boundary.
+- Add a package-check regression assertion for this guard.
+
 ## 1.2.2
 
 - Make the settings client compatible with Harness generations that expose

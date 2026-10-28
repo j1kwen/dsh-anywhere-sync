@@ -1110,7 +1110,7 @@ window.__ModuleLoader__.load({
                               h('code', { className: 'as-file-path' }, shortPath(entry.path)),
                               h('span', { className: 'as-file-size' }, entry.action === 'delete' ? '−' : formatBytes(entry.size))))))
                       : null)),
-            Array.isArray(lastResult.localPluginsRegistered) && lastResult.localPluginsRegistered.length > 0
+            Array.isArray(lastResult?.localPluginsRegistered) && lastResult.localPluginsRegistered.length > 0
               ? h('div', { className: 'as-banner as-ok' },
                   h('div', { className: 'as-banner-text' },
                     h('b', null, tr('localPluginsRegistered')),
@@ -1330,7 +1330,7 @@ window.__ModuleLoader__.load({
       inject: ['slots', 'locale'],
       apply(ctx) {
         try {
-          console.info('[anywhere-sync] settings client 1.2.2 loaded')
+          console.info('[anywhere-sync] settings client 1.2.3 loaded')
         } catch {
           // Console may be unavailable.
         }
