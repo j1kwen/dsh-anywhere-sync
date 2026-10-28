@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+.engine-test/
+.http-test/
+.install-test/
+dist/
+*.log
+.env
+.env.*

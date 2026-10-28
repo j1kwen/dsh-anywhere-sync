@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify the tagged tree
+        run: npm run verify
+
+      - name: Build the release tarball
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          npm pack --pack-destination dist
+          version=$(node -p "require('./package.json').version")
+          test -f "dist/dsh-harness-sync-$version.tgz"
+          cp "dist/dsh-harness-sync-$version.tgz" dist/dsh-harness-sync.tgz
+          cd dist
+          sha256sum dsh-harness-sync.tgz > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Sign the checksums with Sigstore (keyless)
+        uses: sigstore/cosign-installer@v3
+      - name: Produce the Sigstore bundle
+        run: |
+          set -euo pipefail
+          cosign sign-blob --yes \
+            --bundle dist/SHA256SUMS.sigstore.json \
+            dist/SHA256SUMS
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/dsh-harness-sync.tgz
+
+      - name: Publish the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/dsh-harness-sync.tgz
+            dist/SHA256SUMS
+            dist/SHA256SUMS.sigstore.json
+          generate_release_notes: true
+          body: |
+            Install with the Plugin Manager, or:
+
+            ```bash
+            dsh plugin --profile desktop add j1kwen/dsh-harness-sync
+            ```
+
+            Verify this release:
+
+            ```bash
+            sha256sum -c SHA256SUMS
+            gh attestation verify dsh-harness-sync.tgz --repo j1kwen/dsh-harness-sync
+            cosign verify-blob --bundle SHA256SUMS.sigstore.json \
+              --certificate-identity-regexp 'https://github.com/j1kwen/dsh-harness-sync/.github/workflows/release.yml@refs/tags/.*' \
+              --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+              SHA256SUMS
+            ```

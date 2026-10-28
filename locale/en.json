@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Config Sync",
+    "description": "Share Harness configuration, plugins, plugin settings and skills across machines through a private GitHub repository, item by item."
+  }
+}
